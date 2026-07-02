@@ -41,6 +41,13 @@ const showingNavigationDropdown = ref(false);
                                 </NavLink>
 
                                 <NavLink
+                                    :href="route('donations.index')"
+                                    :active="route().current('donations.*')"
+                                >
+                                    Donaciones
+                                </NavLink>
+
+                                <NavLink
                                     v-if="$page.props.auth.user.rol === 'admin'"
                                     :href="route('admin.users.index')"
                                     :active="route().current('admin.users.*')"
@@ -153,6 +160,13 @@ const showingNavigationDropdown = ref(false);
                             :active="route().current('dashboard')"
                         >
                             Dashboard
+                        </ResponsiveNavLink>
+
+                        <ResponsiveNavLink
+                            :href="route('donations.index')"
+                            :active="route().current('donations.*')"
+                        >
+                            Donaciones
                         </ResponsiveNavLink>
 
                         <ResponsiveNavLink

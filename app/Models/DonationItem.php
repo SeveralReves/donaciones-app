@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Database\Factories\DonationItemFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class DonationItem extends Model
 {
-    use HasUuids;
+    /** @use HasFactory<DonationItemFactory> */
+    use HasFactory, HasUuids;
 
     protected $fillable = [
         'donation_id',
