@@ -1,13 +1,4 @@
-const DONATION_TYPE_LABELS = {
-    insumos_medicos: 'Insumos médicos',
-    higiene: 'Higiene',
-    alimentos: 'Alimentos',
-    otros: 'Otros',
-};
-
-function donationTypeLabel(donationType) {
-    return DONATION_TYPE_LABELS[donationType] ?? donationType;
-}
+import { donationTypeLabel } from './labels.js';
 
 function formatItemsList(items) {
     return (items ?? [])
@@ -63,8 +54,22 @@ export function buildReceiverMessage(donation) {
     return lines.join('\n');
 }
 
+const VENEZUELA_COUNTRY_CODE = '58';
+
+/**
+ * Limpia el teléfono y, si viene en formato local venezolano (empieza con
+ * 0, ej. 0424-123-4567), lo normaliza a formato internacional reemplazando
+ * el 0 inicial por el código de país 58 (0424... -> 58424...), que es lo
+ * que wa.me necesita para abrir el chat correctamente.
+ */
 function cleanPhoneNumber(phone) {
-    return String(phone ?? '').replace(/\D/g, '');
+    const digits = String(phone ?? '').replace(/\D/g, '');
+
+    if (digits.startsWith('0')) {
+        return `${VENEZUELA_COUNTRY_CODE}${digits.slice(1)}`;
+    }
+
+    return digits;
 }
 
 /**

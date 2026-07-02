@@ -31,6 +31,10 @@ class UpdateDonationStatusRequest extends FormRequest
             ];
         }
 
+        foreach (DonationStatusFlow::optionalFields($donation, $this->input('status', '')) as $field) {
+            $rules[$field] = ['nullable', 'string', 'max:255'];
+        }
+
         return $rules;
     }
 

@@ -24,7 +24,7 @@ function handleImageError() {
 </script>
 
 <template>
-    <Head title="Welcome" />
+    <Head title="Bienvenido" />
     <div class="bg-gray-50 text-black/50 dark:bg-black dark:text-white/50">
         <img
             id="background"
@@ -57,7 +57,7 @@ function handleImageError() {
                             :href="route('dashboard')"
                             class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
                         >
-                            Dashboard
+                            Panel
                         </Link>
 
                         <Link
@@ -65,7 +65,7 @@ function handleImageError() {
                             :href="route('login')"
                             class="rounded-md px-3 py-2 text-black ring-1 ring-transparent transition hover:text-black/70 focus:outline-none focus-visible:ring-[#FF2D20] dark:text-white dark:hover:text-white/80 dark:focus-visible:ring-white"
                         >
-                            Log in
+                            Iniciar sesión
                         </Link>
                     </nav>
                 </header>
@@ -128,17 +128,16 @@ function handleImageError() {
                                         <h2
                                             class="text-xl font-semibold text-black dark:text-white"
                                         >
-                                            Documentation
+                                            Documentación
                                         </h2>
 
                                         <p class="mt-4 text-sm/relaxed">
-                                            Laravel has wonderful documentation
-                                            covering every aspect of the
-                                            framework. Whether you are a
-                                            newcomer or have prior experience
-                                            with Laravel, we recommend reading
-                                            our documentation from beginning to
-                                            end.
+                                            Laravel tiene una documentación
+                                            excelente que cubre todos los
+                                            aspectos del framework. Ya seas
+                                            nuevo o tengas experiencia previa
+                                            con Laravel, te recomendamos
+                                            leerla de principio a fin.
                                         </p>
                                     </div>
                                 </div>
@@ -188,11 +187,11 @@ function handleImageError() {
                                 </h2>
 
                                 <p class="mt-4 text-sm/relaxed">
-                                    Laracasts offers thousands of video
-                                    tutorials on Laravel, PHP, and JavaScript
-                                    development. Check them out, see for
-                                    yourself, and massively level up your
-                                    development skills in the process.
+                                    Laracasts ofrece miles de tutoriales en
+                                    video sobre desarrollo con Laravel, PHP y
+                                    JavaScript. Échales un vistazo y lleva tus
+                                    habilidades de desarrollo al siguiente
+                                    nivel.
                                 </p>
                             </div>
 
@@ -246,11 +245,11 @@ function handleImageError() {
                                 </h2>
 
                                 <p class="mt-4 text-sm/relaxed">
-                                    Laravel News is a community driven portal
-                                    and newsletter aggregating all of the latest
-                                    and most important news in the Laravel
-                                    ecosystem, including new package releases
-                                    and tutorials.
+                                    Laravel News es un portal y newsletter
+                                    manejado por la comunidad que reúne las
+                                    noticias más recientes e importantes del
+                                    ecosistema Laravel, incluyendo nuevos
+                                    paquetes y tutoriales.
                                 </p>
                             </div>
 
@@ -293,12 +292,12 @@ function handleImageError() {
                                 <h2
                                     class="text-xl font-semibold text-black dark:text-white"
                                 >
-                                    Vibrant Ecosystem
+                                    Un ecosistema vibrante
                                 </h2>
 
                                 <p class="mt-4 text-sm/relaxed">
-                                    Laravel's robust library of first-party
-                                    tools and libraries, such as
+                                    La robusta colección de herramientas y
+                                    librerías oficiales de Laravel, como
                                     <a
                                         href="https://forge.laravel.com"
                                         class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white dark:focus-visible:ring-[#FF2D20]"
@@ -318,15 +317,15 @@ function handleImageError() {
                                         href="https://envoyer.io"
                                         class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
                                         >Envoyer</a
-                                    >, and
+                                    >, y
                                     <a
                                         href="https://herd.laravel.com"
                                         class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
                                         >Herd</a
                                     >
-                                    help you take your projects to the next
-                                    level. Pair them with powerful open source
-                                    libraries like
+                                    te ayudan a llevar tus proyectos al
+                                    siguiente nivel. Combínalas con potentes
+                                    librerías de código abierto como
                                     <a
                                         href="https://laravel.com/docs/billing"
                                         class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
@@ -356,7 +355,7 @@ function handleImageError() {
                                         href="https://laravel.com/docs/telescope"
                                         class="rounded-sm underline hover:text-black focus:outline-none focus-visible:ring-1 focus-visible:ring-[#FF2D20] dark:hover:text-white"
                                         >Telescope</a
-                                    >, and more.
+                                    >, y más.
                                 </p>
                             </div>
                         </div>

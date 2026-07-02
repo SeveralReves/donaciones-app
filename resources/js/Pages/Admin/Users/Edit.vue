@@ -78,7 +78,7 @@ const resetPassword = () => {
                         </div>
 
                         <div class="mt-4">
-                            <InputLabel for="email" value="Email" />
+                            <InputLabel for="email" value="Correo electrónico" />
                             <TextInput
                                 id="email"
                                 type="email"

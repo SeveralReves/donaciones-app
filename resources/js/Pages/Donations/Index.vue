@@ -2,6 +2,12 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed, reactive, watch } from 'vue';
+import { donationStatusLabel, donationTypeLabel } from '@/utils/labels';
+
+const paginationLabel = (label) =>
+    label
+        .replace('&laquo; Previous', 'Anterior')
+        .replace('Next &raquo;', 'Siguiente');
 
 const props = defineProps({
     donations: {
@@ -100,20 +106,20 @@ watch(
                         :key="status"
                         class="rounded-full bg-gray-100 px-3 py-1"
                     >
-                        {{ statusCounts[status] ?? 0 }} {{ status }}
+                        {{ statusCounts[status] ?? 0 }} {{ donationStatusLabel(status) }}
                     </span>
                 </div>
 
                 <div class="mb-4 flex flex-wrap items-end gap-4 rounded-md bg-white p-4 shadow-sm">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Status</label>
+                        <label class="block text-sm font-medium text-gray-700">Estado</label>
                         <select
                             v-model="filters.status"
                             class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         >
                             <option value="">Todos</option>
                             <option v-for="status in statuses" :key="status" :value="status">
-                                {{ status }}
+                                {{ donationStatusLabel(status) }}
                             </option>
                         </select>
                     </div>
@@ -126,7 +132,7 @@ watch(
                         >
                             <option value="">Todos</option>
                             <option v-for="type in donationTypes" :key="type" :value="type">
-                                {{ type }}
+                                {{ donationTypeLabel(type) }}
                             </option>
                         </select>
                     </div>
@@ -175,7 +181,7 @@ watch(
                             <tr>
                                 <th class="px-6 py-3">Tipo</th>
                                 <th class="px-6 py-3">Ubicación</th>
-                                <th class="px-6 py-3">Status</th>
+                                <th class="px-6 py-3">Estado</th>
                                 <th class="px-6 py-3">Fecha</th>
                                 <th class="px-6 py-3">Creado por</th>
                                 <th class="px-6 py-3"></th>
@@ -187,9 +193,9 @@ watch(
                                 :key="donation.id"
                                 class="border-b last:border-0"
                             >
-                                <td class="px-6 py-3">{{ donation.donation_type }}</td>
+                                <td class="px-6 py-3">{{ donationTypeLabel(donation.donation_type) }}</td>
                                 <td class="px-6 py-3">{{ donation.location }}</td>
-                                <td class="px-6 py-3">{{ donation.status }}</td>
+                                <td class="px-6 py-3">{{ donationStatusLabel(donation.status) }}</td>
                                 <td class="px-6 py-3">
                                     {{ new Date(donation.created_at).toLocaleDateString() }}
                                 </td>
@@ -217,7 +223,7 @@ watch(
                         v-for="link in donations.links"
                         :key="link.label"
                         :href="link.url ?? '#'"
-                        v-html="link.label"
+                        v-html="paginationLabel(link.label)"
                         class="rounded-md border px-3 py-1 text-sm"
                         :class="{
                             'bg-indigo-600 text-white': link.active,

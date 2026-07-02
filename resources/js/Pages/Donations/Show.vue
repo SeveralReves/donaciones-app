@@ -7,6 +7,7 @@ import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { getDeliveryWhatsAppUrl, getReceiverWhatsAppUrl } from '@/utils/whatsapp';
+import { donationStatusLabel, donationTypeLabel } from '@/utils/labels';
 
 const props = defineProps({
     donation: {
@@ -22,6 +23,10 @@ const props = defineProps({
         default: null,
     },
     missingFields: {
+        type: Array,
+        default: () => [],
+    },
+    optionalFields: {
         type: Array,
         default: () => [],
     },
@@ -41,6 +46,7 @@ function buildStatusForm() {
     return useForm(
         Object.fromEntries([
             ...props.missingFields.map((field) => [field, '']),
+            ...props.optionalFields.map((field) => [field, '']),
             ['status', props.nextStatus],
         ]),
     );
@@ -49,7 +55,7 @@ function buildStatusForm() {
 const statusForm = ref(buildStatusForm());
 
 watch(
-    () => [props.nextStatus, props.missingFields],
+    () => [props.nextStatus, props.missingFields, props.optionalFields],
     () => {
         statusForm.value = buildStatusForm();
     },
@@ -87,7 +93,7 @@ const receiverWhatsAppUrl = computed(() =>
     <AuthenticatedLayout>
         <template #header>
             <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Donación — {{ donation.donation_type }} ({{ donation.location }})
+                Donación — {{ donationTypeLabel(donation.donation_type) }} ({{ donation.location }})
             </h2>
         </template>
 
@@ -96,7 +102,7 @@ const receiverWhatsAppUrl = computed(() =>
                 <div class="bg-white p-6 shadow-sm sm:rounded-lg">
                     <h3 class="text-sm font-semibold text-gray-700">
                         Estado actual:
-                        <span class="font-mono">{{ donation.status }}</span>
+                        <span class="font-mono">{{ donationStatusLabel(donation.status) }}</span>
                     </h3>
 
                     <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
@@ -220,7 +226,7 @@ const receiverWhatsAppUrl = computed(() =>
 
                 <div v-if="nextStatus" class="bg-white p-6 shadow-sm sm:rounded-lg">
                     <h3 class="text-sm font-semibold text-gray-700">
-                        Avanzar a "{{ nextStatus }}"
+                        Avanzar a "{{ donationStatusLabel(nextStatus) }}"
                     </h3>
 
                     <form @submit.prevent="advance">
@@ -242,6 +248,23 @@ const receiverWhatsAppUrl = computed(() =>
                             <InputError class="mt-2" :message="statusForm.errors[field]" />
                         </div>
 
+                        <div
+                            v-for="field in optionalFields"
+                            :key="field"
+                            class="mt-4"
+                        >
+                            <InputLabel
+                                :for="field"
+                                :value="fieldLabels[field] ?? field"
+                            />
+                            <TextInput
+                                :id="field"
+                                v-model="statusForm[field]"
+                                class="mt-1 block w-full"
+                            />
+                            <InputError class="mt-2" :message="statusForm.errors[field]" />
+                        </div>
+
                         <InputError class="mt-2" :message="statusForm.errors.status" />
 
                         <div class="mt-6">
@@ -249,7 +272,7 @@ const receiverWhatsAppUrl = computed(() =>
                                 :disabled="!canAdvance || statusForm.processing"
                                 :class="{ 'opacity-25': !canAdvance || statusForm.processing }"
                             >
-                                Avanzar a {{ nextStatus }}
+                                Avanzar a {{ donationStatusLabel(nextStatus) }}
                             </PrimaryButton>
                         </div>
                     </form>
@@ -264,10 +287,10 @@ const receiverWhatsAppUrl = computed(() =>
                         <li v-for="log in statusLogs" :key="log.id" class="text-sm">
                             <div class="text-gray-500">{{ formatDate(log.changed_at) }}</div>
                             <div>
-                                <span v-if="log.from_status" class="font-mono">{{ log.from_status }}</span>
+                                <span v-if="log.from_status" class="font-mono">{{ donationStatusLabel(log.from_status) }}</span>
                                 <span v-else class="italic text-gray-500">inicio</span>
                                 →
-                                <span class="font-mono">{{ log.to_status }}</span>
+                                <span class="font-mono">{{ donationStatusLabel(log.to_status) }}</span>
                             </div>
                             <div class="text-gray-500">
                                 por {{ log.changed_by?.name ?? '—' }}

@@ -76,6 +76,26 @@ class DonationStatusFlow
     }
 
     /**
+     * Campos que se pueden completar al avanzar a $toStatus pero que no
+     * bloquean el avance si faltan (a diferencia de requiredFields). Solo se
+     * muestran/aceptan si la donación todavía no tiene valor para ellos.
+     *
+     * @return list<string>
+     */
+    public static function optionalFields(Donation $donation, string $toStatus): array
+    {
+        $fields = match ($toStatus) {
+            'esperando_delivery' => ['delivery_contact'],
+            default => [],
+        };
+
+        return array_values(array_filter(
+            $fields,
+            fn (string $field) => blank($donation->{$field}),
+        ));
+    }
+
+    /**
      * Etiquetas legibles para los campos que puede pedir el flujo, usadas
      * tanto en mensajes de validación como en la UI.
      *
@@ -89,6 +109,7 @@ class DonationStatusFlow
             'receiving_service' => 'servicio del médico',
             'vehicle_type' => 'tipo de vehículo',
             'delivery_name' => 'nombre de quien entrega',
+            'delivery_contact' => 'contacto del delivery (opcional)',
         ];
     }
 }

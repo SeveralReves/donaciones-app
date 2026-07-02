@@ -105,6 +105,9 @@ class DonationController extends Controller
             'missingFields' => $nextStatus
                 ? DonationStatusFlow::missingFields($donation, $nextStatus)
                 : [],
+            'optionalFields' => $nextStatus
+                ? DonationStatusFlow::optionalFields($donation, $nextStatus)
+                : [],
             'fieldLabels' => DonationStatusFlow::fieldLabels(),
         ]);
     }

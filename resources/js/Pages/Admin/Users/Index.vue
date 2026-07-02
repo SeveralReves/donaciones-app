@@ -1,6 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { userRoleLabel } from '@/utils/labels';
 
 defineProps({
     users: {
@@ -36,7 +37,7 @@ defineProps({
                         <thead class="border-b bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3">Nombre</th>
-                                <th class="px-6 py-3">Email</th>
+                                <th class="px-6 py-3">Correo electrónico</th>
                                 <th class="px-6 py-3">Rol</th>
                                 <th class="px-6 py-3">Código médico</th>
                                 <th class="px-6 py-3">Servicio</th>
@@ -51,7 +52,7 @@ defineProps({
                             >
                                 <td class="px-6 py-3">{{ user.name }}</td>
                                 <td class="px-6 py-3">{{ user.email }}</td>
-                                <td class="px-6 py-3">{{ user.rol }}</td>
+                                <td class="px-6 py-3">{{ userRoleLabel(user.rol) }}</td>
                                 <td class="px-6 py-3">
                                     {{ user.codigo_medico ?? '—' }}
                                 </td>
