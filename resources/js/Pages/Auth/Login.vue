@@ -107,6 +107,18 @@ const submit = () => {
                 </button>
             </form>
         </div>
+
+        <p class="login-page__footer">
+            Desarrollado por
+            <a
+                href="https://svrdatatech.lat/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="login-page__footer-link"
+            >
+                SVRDataTech
+            </a>
+        </p>
     </div>
 </template>
 
@@ -114,8 +126,10 @@ const submit = () => {
 .login-page {
     display: flex;
     min-height: 100vh;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 1rem;
     padding: 1.5rem;
 }
 
@@ -229,6 +243,20 @@ const submit = () => {
 }
 
 .login-page__forgot:hover {
+    text-decoration: underline;
+}
+
+.login-page__footer {
+    font-size: 0.8125rem;
+    color: #7a8b84;
+}
+
+.login-page__footer-link {
+    font-weight: 600;
+    color: #148f5b;
+}
+
+.login-page__footer-link:hover {
     text-decoration: underline;
 }
 </style>
