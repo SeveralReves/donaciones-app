@@ -1,9 +1,12 @@
 <script setup>
 import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
+import { useInstallPrompt } from '@/composables/useInstallPrompt';
 import { Link } from '@inertiajs/vue3';
 
 const isAdmin = (user) => user.rol === 'admin';
+
+const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
 </script>
 
 <template>
@@ -50,6 +53,18 @@ const isAdmin = (user) => user.rol === 'admin';
                 </div>
 
                 <div class="app-header__actions">
+                    <button
+                        v-if="canInstall"
+                        type="button"
+                        class="btn btn--secondary app-header__install"
+                        @click="promptInstall"
+                    >
+                        Instalar app
+                    </button>
+                    <span v-else-if="showIosInstallHint" class="app-header__ios-hint">
+                        En iPhone: toca compartir y luego "Agregar a pantalla de inicio"
+                    </span>
+
                     <Link :href="route('donations.create')" class="app-header__cta">
                         <span class="app-header__cta-icon">+</span>
                         <span class="app-header__cta-label">Nueva donación</span>

@@ -145,6 +145,35 @@
         }
     }
 
+    // Botón de instalación de la PWA: reutiliza .btn--secondary pero con
+    // tamaño reducido para convivir con el resto de acciones del header.
+    &__install {
+        min-height: 36px;
+        padding: 6px $spacing-sm;
+        font-size: 12px;
+        white-space: nowrap;
+
+        @include respond(tablet) {
+            padding: 6px $spacing-md;
+            font-size: $font-size-sm;
+        }
+    }
+
+    &__ios-hint {
+        max-width: 140px;
+        overflow: hidden;
+        font-size: 10px;
+        line-height: 1.25;
+        color: #bfe0cd;
+        text-overflow: ellipsis;
+
+        @include respond(tablet) {
+            max-width: none;
+            font-size: 11px;
+            white-space: nowrap;
+        }
+    }
+
     &__cta {
         display: flex;
         align-items: center;
