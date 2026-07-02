@@ -25,3 +25,13 @@ createInertiaApp({
         color: '#4B5563',
     },
 });
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch(() => {
+            // Silencioso: si el registro falla (o el navegador no lo
+            // soporta del todo pese al check de arriba), la app sigue
+            // funcionando normal, solo sin las capacidades de PWA.
+        });
+    });
+}
