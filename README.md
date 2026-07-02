@@ -1,58 +1,75 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Control de Donaciones
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplicación web para registrar y dar seguimiento a donaciones (alimentos, higiene, insumos médicos, otros) desde que se crean hasta que llegan a quien las recibe: estado, artículos, responsables, delivery y notificación por WhatsApp.
 
-## About Laravel
+## Stack
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+- **Backend:** Laravel 13 (PHP ^8.3), PostgreSQL.
+- **Frontend:** Inertia.js + Vue 3 (`<script setup>`), sin SPA router propio — las páginas son componentes en `resources/js/Pages`.
+- **Estilos:** SCSS propio con metodología BEM (`resources/sass`). **No se usa Tailwind, Bootstrap ni ningún framework de CSS.**
+- **Build:** Vite.
+- **PWA:** instalable (manifest + service worker mínimo que solo cachea el shell estático). Sin soporte offline de datos todavía.
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## Requisitos
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+- PHP >= 8.3, Composer
+- Node >= 18, npm
+- PostgreSQL
 
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Instalación
 
 ```bash
-composer require laravel/boost --dev
-
-php artisan boost:install
+composer install
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Configurá la conexión a PostgreSQL en `.env` (`DB_*`). Para el primer usuario admin, definí `ADMIN_EMAIL` y `ADMIN_PASSWORD` en `.env` (fuera de `local` son obligatorias; el seeder falla si faltan).
 
-## Contributing
+```bash
+php artisan migrate --seed
+npm install
+npm run build
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+## Desarrollo
 
-## Code of Conduct
+```bash
+composer run dev
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+Levanta en paralelo: servidor PHP (`artisan serve`), worker de colas, `artisan pail` (logs) y Vite en modo watch.
 
-## Security Vulnerabilities
+## Tests
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+```bash
+composer test
+```
 
-## License
+## Estructura relevante
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```
+app/Http/Controllers/          Dashboard, Donation, Admin/User
+app/Services/DonationStatusFlow.php   única fuente de verdad de la secuencia de estados
+                                       y los campos requeridos para avanzar a cada uno
+app/Models/                    Donation, DonationItem, DonationStatusLog, MedicalReceiver, User
+resources/js/Pages/            Dashboard, Donations/{Index,Create,Show}, Admin/Users/*, Auth/*, Profile/*
+resources/js/Layouts/          AuthenticatedLayout (header verde + nav), GuestLayout (login)
+resources/sass/                Design system BEM: abstracts (tokens), base, layout, components
+public/manifest.json, sw.js    PWA
+```
+
+## Dominio
+
+**Estados de una donación** (secuencia fija, ver `DonationStatusFlow`):
+`creada` → `en_proceso` → `esperando_delivery` → `en_camino` → `recibido`
+
+**Tipos de donación:** `insumos_medicos`, `higiene`, `alimentos`, `otros` (los insumos médicos exigen datos del médico/servicio receptor).
+
+**Roles de usuario:** `admin` (gestiona usuarios, `Gate::define('manage-users', ...)`), `medico`, `odontologo`.
+
+**WhatsApp:** desde el detalle de una donación se puede enviar un mensaje prearmado al delivery o a quien recibe (`resources/js/utils/whatsapp.js`), abriendo `wa.me` con el número normalizado.
+
+## Convenciones de estilos
+
+Todo el CSS vive en `resources/sass/` con metodología BEM (`bloque__elemento--modificador`). Componentes reutilizables (botones, campos, tarjetas, chips, avatares, tablas) están en `resources/sass/components/`; el layout de página en `resources/sass/layout/`. Las páginas Vue pueden agregar un `<style scoped>` propio para su layout específico, siempre con clases BEM — nunca clases utilitarias tipo Tailwind.
