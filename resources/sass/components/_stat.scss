@@ -1,0 +1,37 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// .stat — tarjeta de indicador numérico (KPI) para el panel.
+.stat {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-xs;
+    padding: $spacing-md;
+    border: $border-width solid $color-border;
+    border-radius: $border-radius;
+    background-color: $color-background;
+
+    &__value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.1;
+        color: $color-text;
+    }
+
+    &__label {
+        font-size: $font-size-sm;
+        color: $color-text-light;
+    }
+}
+
+// .stat-grid — contenedor de tarjetas .stat: 2 columnas en mobile (para no
+// alargar demasiado la página), 4 desde tablet.
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: $spacing-md;
+
+    @include respond(tablet) {
+        grid-template-columns: repeat(4, 1fr);
+    }
+}
