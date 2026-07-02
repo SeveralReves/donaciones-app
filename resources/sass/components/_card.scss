@@ -1,4 +1,3 @@
-@use 'sass:color';
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as *;
 
@@ -7,9 +6,14 @@
     display: flex;
     flex-direction: column;
     border: $border-width solid $color-border;
-    border-radius: $border-radius;
+    border-radius: $border-radius-lg;
     background-color: $color-background;
     overflow: hidden;
+    transition: background-color 0.15s ease;
+
+    &:hover {
+        background-color: $color-background-alt;
+    }
 
     &__header {
         display: flex;
@@ -54,28 +58,28 @@
         white-space: nowrap;
 
         &--creada {
-            background-color: color.change($color-info, $alpha: 0.12);
-            color: $color-info;
+            background-color: $status-creada-bg;
+            color: $status-creada-color;
         }
 
         &--en_proceso {
-            background-color: color.change($color-warning, $alpha: 0.12);
-            color: $color-warning;
+            background-color: $status-en-proceso-bg;
+            color: $status-en-proceso-color;
         }
 
         &--esperando_delivery {
-            background-color: color.change($color-secondary, $alpha: 0.15);
-            color: $color-secondary;
+            background-color: $status-esperando-delivery-bg;
+            color: $status-esperando-delivery-color;
         }
 
         &--en_camino {
-            background-color: color.change($color-primary, $alpha: 0.12);
-            color: $color-primary;
+            background-color: $status-en-camino-bg;
+            color: $status-en-camino-color;
         }
 
         &--recibido {
-            background-color: color.change($color-success, $alpha: 0.12);
-            color: $color-success;
+            background-color: $status-recibido-bg;
+            color: $status-recibido-color;
         }
     }
 }

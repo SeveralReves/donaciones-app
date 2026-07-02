@@ -1,0 +1,43 @@
+@use '../abstracts/variables' as *;
+
+// .chip — etiqueta seleccionable, usada para elegir el tipo de una
+// donación nueva y para filtrar el listado por estado. El modificador
+// --active marca la opción actualmente seleccionada.
+.chip {
+    display: inline-flex;
+    align-items: center;
+    gap: $spacing-xs;
+    padding: $spacing-sm $spacing-md;
+    border: 1.5px solid $color-border-input;
+    border-radius: $border-radius;
+    background-color: $color-background;
+    color: $color-text;
+    font-family: inherit;
+    font-size: $font-size-sm;
+    font-weight: 500;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        color 0.15s ease;
+
+    &--active {
+        background-color: $color-primary;
+        border-color: $color-primary;
+        color: #fff;
+        font-weight: 600;
+    }
+
+    // --pill: usado en los filtros de estado (más redondeado, con contador).
+    &--pill {
+        border-radius: 999px;
+        border-color: $color-border-input;
+        color: $color-text-light;
+
+        &.chip--active {
+            color: #fff;
+        }
+    }
+}

@@ -1,26 +1,45 @@
+@use 'sass:color';
 @use '../abstracts/variables' as *;
 @use '../abstracts/mixins' as *;
 
-// .stat — tarjeta de indicador numérico (KPI) para el panel.
+// .stat — tarjeta de indicador numérico (KPI) para el panel. El modificador
+// --highlight se usa en el KPI principal para destacarlo con el color de
+// marca (fondo verde sólido en vez de tarjeta blanca).
 .stat {
     display: flex;
     flex-direction: column;
-    gap: $spacing-xs;
-    padding: $spacing-md;
+    gap: $spacing-sm;
+    padding: $spacing-lg;
     border: $border-width solid $color-border;
-    border-radius: $border-radius;
+    border-radius: $border-radius-lg;
     background-color: $color-background;
 
     &__value {
-        font-size: 1.75rem;
-        font-weight: 700;
-        line-height: 1.1;
+        font-size: 2.125rem;
+        font-weight: 800;
+        line-height: 1;
         color: $color-text;
     }
 
     &__label {
         font-size: $font-size-sm;
-        color: $color-text-light;
+        font-weight: 500;
+        color: $color-text-muted;
+    }
+
+    &--highlight {
+        border: none;
+        background-color: $color-primary;
+        box-shadow: 0 16px 30px -16px color.change($color-primary, $alpha: 0.6);
+
+        .stat__value,
+        .stat__label {
+            color: #fff;
+        }
+
+        .stat__label {
+            opacity: 0.9;
+        }
     }
 }
 

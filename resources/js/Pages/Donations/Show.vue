@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { getDeliveryWhatsAppUrl, getReceiverWhatsAppUrl } from '@/utils/whatsapp';
 import { donationStatusLabel, donationTypeLabel } from '@/utils/labels';
@@ -87,16 +87,21 @@ const receiverWhatsAppUrl = computed(() =>
     <Head title="Detalle de donación" />
 
     <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Donación — {{ donationTypeLabel(donation.donation_type) }} ({{ donation.location }})
-            </h2>
-        </template>
+        <div class="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
+            <Link
+                :href="route('donations.index')"
+                class="mb-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#148f5b] hover:underline"
+            >
+                <span class="text-base leading-none">←</span> Volver a donaciones
+            </Link>
 
-        <div class="container">
-            <div class="space-y-6">
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <h3 class="text-sm font-semibold text-gray-700">
+            <h1 class="mb-6">
+                {{ donationTypeLabel(donation.donation_type) }} — {{ donation.location }}
+            </h1>
+
+            <div class="space-y-4">
+                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
+                    <h3 class="text-sm font-semibold text-[#5a686d]">
                         Estado actual:
                         <span
                             :class="`donation-card__status donation-card__status--${donation.status}`"
@@ -107,52 +112,52 @@ const receiverWhatsAppUrl = computed(() =>
 
                     <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
                         <div>
-                            <dt class="text-gray-500">Paciente</dt>
+                            <dt class="text-[#8a969a]">Paciente</dt>
                             <dd>{{ donation.patient_name ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500">Ubicación</dt>
+                            <dt class="text-[#8a969a]">Ubicación</dt>
                             <dd>{{ donation.location }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500">Contacto</dt>
+                            <dt class="text-[#8a969a]">Contacto</dt>
                             <dd>{{ donation.contact_number ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500">Cédula</dt>
+                            <dt class="text-[#8a969a]">Cédula</dt>
                             <dd>{{ donation.cedula ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500">Médico / responsable receptor</dt>
+                            <dt class="text-[#8a969a]">Médico / responsable receptor</dt>
                             <dd>{{ donation.receiving_doctor_name ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500">Código médico</dt>
+                            <dt class="text-[#8a969a]">Código médico</dt>
                             <dd>{{ donation.receiving_doctor_code ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500">Servicio</dt>
+                            <dt class="text-[#8a969a]">Servicio</dt>
                             <dd>{{ donation.receiving_service ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500">Tipo de vehículo</dt>
+                            <dt class="text-[#8a969a]">Tipo de vehículo</dt>
                             <dd>{{ donation.vehicle_type ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500">Nombre de quien entrega</dt>
+                            <dt class="text-[#8a969a]">Nombre de quien entrega</dt>
                             <dd>{{ donation.delivery_name ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-gray-500">Contacto de quien entrega</dt>
+                            <dt class="text-[#8a969a]">Contacto de quien entrega</dt>
                             <dd>{{ donation.delivery_contact ?? '—' }}</dd>
                         </div>
                     </dl>
                 </div>
 
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <h3 class="text-sm font-semibold text-gray-700">Artículos</h3>
+                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
+                    <h3 class="text-sm font-semibold text-[#5a686d]">Artículos</h3>
                     <table class="mt-4 w-full text-left text-sm">
-                        <thead class="border-b bg-gray-50">
+                        <thead class="border-b border-[#eef2f1] bg-[#f6f9f8]">
                             <tr>
                                 <th class="px-4 py-2">Nombre</th>
                                 <th class="px-4 py-2">Cantidad</th>
@@ -163,7 +168,7 @@ const receiverWhatsAppUrl = computed(() =>
                             <tr
                                 v-for="item in donation.items"
                                 :key="item.id"
-                                class="border-b last:border-0"
+                                class="border-b border-[#f1f4f3] last:border-0"
                             >
                                 <td class="px-4 py-2">{{ item.name }}</td>
                                 <td class="px-4 py-2">{{ item.quantity }}</td>
@@ -175,9 +180,9 @@ const receiverWhatsAppUrl = computed(() =>
 
                 <div
                     v-if="(deliveryAssigned && donation.delivery_contact) || donation.contact_number"
-                    class="bg-white p-6 shadow-sm sm:rounded-lg"
+                    class="rounded-2xl border border-[#e6ede9] bg-white p-6"
                 >
-                    <h3 class="text-sm font-semibold text-gray-700">
+                    <h3 class="text-sm font-semibold text-[#5a686d]">
                         Enviar por WhatsApp
                     </h3>
 
@@ -224,8 +229,8 @@ const receiverWhatsAppUrl = computed(() =>
                     </div>
                 </div>
 
-                <div v-if="nextStatus" class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <h3 class="text-sm font-semibold text-gray-700">
+                <div v-if="nextStatus" class="rounded-2xl border border-[#e6ede9] bg-white p-6">
+                    <h3 class="text-sm font-semibold text-[#5a686d]">
                         Avanzar a "{{ donationStatusLabel(nextStatus) }}"
                     </h3>
 
@@ -286,8 +291,8 @@ const receiverWhatsAppUrl = computed(() =>
                     </form>
                 </div>
 
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <h3 class="text-sm font-semibold text-gray-700">
+                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
+                    <h3 class="text-sm font-semibold text-[#5a686d]">
                         Historial de estados
                     </h3>
 

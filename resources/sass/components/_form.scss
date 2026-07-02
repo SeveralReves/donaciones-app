@@ -23,20 +23,25 @@
         width: 100%;
         min-height: 44px;
         padding: $spacing-sm $spacing-md;
-        border: $border-width solid $color-border;
+        border: $border-width solid $color-border-input;
         border-radius: $border-radius;
         font-family: inherit;
         font-size: $font-size-base;
+        font-weight: 500;
         color: $color-text;
         background-color: $color-background;
         transition:
             border-color 0.15s ease,
             box-shadow 0.15s ease;
 
+        &::placeholder {
+            color: $color-text-muted;
+        }
+
         &:focus {
             outline: none;
             border-color: $color-primary;
-            box-shadow: 0 0 0 3px color.change($color-primary, $alpha: 0.15);
+            box-shadow: 0 0 0 3px color.change($color-primary, $alpha: 0.12);
         }
 
         &:disabled {

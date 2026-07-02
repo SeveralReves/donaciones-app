@@ -1,9 +1,10 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link } from '@inertiajs/vue3';
+import { computed } from 'vue';
 import { donationStatusLabel, donationTypeLabel } from '@/utils/labels';
 
-defineProps({
+const props = defineProps({
     totalDonations: {
         type: Number,
         required: true,
@@ -42,7 +43,24 @@ const statuses = [
     'recibido',
 ];
 
+const statusBarColors = {
+    creada: '#5b9bd8',
+    en_proceso: '#e0a94a',
+    esperando_delivery: '#8f88cf',
+    en_camino: '#2aa89b',
+    recibido: '#148f5b',
+};
+
 const donationTypes = ['insumos_medicos', 'higiene', 'alimentos', 'otros'];
+
+const maxStatusCount = computed(() =>
+    Math.max(1, ...statuses.map((status) => props.statusCounts[status] ?? 0)),
+);
+
+const statusBarWidth = (status) =>
+    `${((props.statusCounts[status] ?? 0) / maxStatusCount.value) * 100}%`;
+
+const initial = (donation) => donationTypeLabel(donation.donation_type).charAt(0);
 
 const formatDate = (value) => new Date(value).toLocaleDateString();
 </script>
@@ -51,103 +69,112 @@ const formatDate = (value) => new Date(value).toLocaleDateString();
     <Head title="Panel" />
 
     <AuthenticatedLayout>
-        <template #header>
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                Panel
-            </h2>
-        </template>
+        <div class="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
+            <h1 class="mb-1">Panel</h1>
+            <p class="mb-6 text-sm font-normal text-[#7a8b84]">
+                Resumen de la operación de hoy
+            </p>
 
-        <div class="container">
-            <div class="space-y-6">
-                <div class="stat-grid">
-                    <div class="stat">
-                        <span class="stat__value">{{ totalDonations }}</span>
-                        <span class="stat__label">Donaciones totales</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat__value">{{ donationsToday }}</span>
-                        <span class="stat__label">Creadas hoy</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat__value">{{ donationsThisWeek }}</span>
-                        <span class="stat__label">Creadas esta semana</span>
-                    </div>
-                    <div class="stat">
-                        <span class="stat__value">{{ totalItems }}</span>
-                        <span class="stat__label">Artículos registrados</span>
-                    </div>
+            <div class="stat-grid mb-4">
+                <div class="stat stat--highlight">
+                    <span class="stat__value">{{ totalDonations }}</span>
+                    <span class="stat__label">Donaciones totales</span>
                 </div>
+                <div class="stat">
+                    <span class="stat__value">{{ donationsToday }}</span>
+                    <span class="stat__label">Creadas hoy</span>
+                </div>
+                <div class="stat">
+                    <span class="stat__value">{{ donationsThisWeek }}</span>
+                    <span class="stat__label">Creadas esta semana</span>
+                </div>
+                <div class="stat">
+                    <span class="stat__value">{{ totalItems }}</span>
+                    <span class="stat__label">Artículos registrados</span>
+                </div>
+            </div>
 
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <h3 class="text-sm font-semibold text-gray-700">
-                        Donaciones por estado
-                    </h3>
-
-                    <div class="mt-4 flex flex-wrap gap-2">
-                        <span
+            <div class="mb-4 grid gap-4 md:grid-cols-2">
+                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
+                    <div class="mb-[18px] text-[15px] font-semibold">Donaciones por estado</div>
+                    <div class="flex flex-col gap-[13px]">
+                        <div
                             v-for="status in statuses"
                             :key="status"
-                            :class="`donation-card__status donation-card__status--${status}`"
+                            class="flex items-center gap-3"
                         >
-                            {{ statusCounts[status] ?? 0 }} {{ donationStatusLabel(status) }}
-                        </span>
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <h3 class="text-sm font-semibold text-gray-700">
-                        Donaciones por tipo
-                    </h3>
-
-                    <dl class="mt-4 grid grid-cols-2 gap-4 text-sm sm:grid-cols-4">
-                        <div v-for="type in donationTypes" :key="type">
-                            <dt class="text-gray-500">{{ donationTypeLabel(type) }}</dt>
-                            <dd class="text-lg font-semibold text-gray-900">
-                                {{ typeCounts[type] ?? 0 }}
-                            </dd>
+                            <span class="w-[110px] shrink-0 text-[13px] font-medium text-[#5a686d]">
+                                {{ donationStatusLabel(status) }}
+                            </span>
+                            <div class="h-[9px] flex-1 rounded-full bg-[#eef2f1]">
+                                <div
+                                    class="h-full rounded-full"
+                                    :style="{ width: statusBarWidth(status), backgroundColor: statusBarColors[status] }"
+                                ></div>
+                            </div>
+                            <b class="w-4 shrink-0 text-right text-[13px] font-bold">
+                                {{ statusCounts[status] ?? 0 }}
+                            </b>
                         </div>
-                    </dl>
+                    </div>
                 </div>
 
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <div class="flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-gray-700">
-                            Donaciones recientes
-                        </h3>
-                        <Link
-                            :href="route('donations.index')"
-                            class="text-sm text-indigo-600 hover:underline"
+                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
+                    <div class="mb-[18px] text-[15px] font-semibold">Donaciones por tipo</div>
+                    <div class="grid grid-cols-2 gap-[14px]">
+                        <div
+                            v-for="type in donationTypes"
+                            :key="type"
+                            class="rounded-xl bg-[#eef7f0] px-4 py-[15px]"
                         >
-                            Ver todas
-                        </Link>
+                            <div class="text-[26px] font-extrabold leading-none text-[#148f5b]">
+                                {{ typeCounts[type] ?? 0 }}
+                            </div>
+                            <div class="mt-[5px] text-xs font-medium text-[#6a787d]">
+                                {{ donationTypeLabel(type) }}
+                            </div>
+                        </div>
                     </div>
+                </div>
+            </div>
 
-                    <p v-if="recentDonations.length === 0" class="mt-4 text-sm text-gray-500">
-                        Todavía no hay donaciones registradas.
-                    </p>
+            <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
+                <div class="mb-1 flex items-center justify-between">
+                    <div class="text-[15px] font-semibold">Donaciones recientes</div>
+                    <Link
+                        :href="route('donations.index')"
+                        class="text-[13px] font-semibold text-[#148f5b] hover:underline"
+                    >
+                        Ver todas
+                    </Link>
+                </div>
 
-                    <ul v-else class="mt-4 divide-y divide-gray-100">
-                        <li v-for="donation in recentDonations" :key="donation.id" class="py-3">
-                            <Link
-                                :href="route('donations.show', donation.id)"
-                                class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between"
-                            >
-                                <div>
-                                    <div class="font-medium text-gray-900">
-                                        {{ donationTypeLabel(donation.donation_type) }} — {{ donation.location }}
-                                    </div>
-                                    <div class="text-sm text-gray-500">
-                                        {{ formatDate(donation.created_at) }} · creada por {{ donation.creator?.name ?? '—' }}
-                                    </div>
-                                </div>
-                                <span
-                                    :class="`donation-card__status donation-card__status--${donation.status}`"
-                                >
-                                    {{ donationStatusLabel(donation.status) }}
-                                </span>
-                            </Link>
-                        </li>
-                    </ul>
+                <p v-if="recentDonations.length === 0" class="mt-4 text-sm text-[#7a8b84]">
+                    Todavía no hay donaciones registradas.
+                </p>
+
+                <div v-else>
+                    <Link
+                        v-for="donation in recentDonations"
+                        :key="donation.id"
+                        :href="route('donations.show', donation.id)"
+                        class="flex items-center gap-[13px] border-b border-[#eef2f1] py-[13px] last:border-0"
+                    >
+                        <span class="avatar avatar--square">{{ initial(donation) }}</span>
+                        <div class="min-w-0 flex-1">
+                            <div class="truncate text-sm font-semibold">
+                                {{ donationTypeLabel(donation.donation_type) }} — {{ donation.location }}
+                            </div>
+                            <div class="text-xs text-[#8a969a]">
+                                {{ formatDate(donation.created_at) }} · {{ donation.creator?.name ?? '—' }}
+                            </div>
+                        </div>
+                        <span
+                            :class="`donation-card__status donation-card__status--${donation.status}`"
+                        >
+                            {{ donationStatusLabel(donation.status) }}
+                        </span>
+                    </Link>
                 </div>
             </div>
         </div>

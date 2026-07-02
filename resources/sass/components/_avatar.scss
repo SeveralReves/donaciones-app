@@ -1,0 +1,28 @@
+@use 'sass:color';
+@use '../abstracts/variables' as *;
+
+// .avatar — círculo (o cuadrado redondeado, --square) con la inicial de un
+// nombre o tipo de donación. Reutilizado en listados de donaciones y de
+// usuarios.
+.avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background-color: color.change($color-primary, $alpha: 0.1);
+    color: $color-primary;
+    font-weight: 700;
+    font-size: $font-size-sm;
+
+    &--square {
+        border-radius: $border-radius;
+    }
+
+    &--lg {
+        width: 40px;
+        height: 40px;
+    }
+}

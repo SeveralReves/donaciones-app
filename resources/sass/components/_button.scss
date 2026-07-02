@@ -33,6 +33,7 @@
     &--primary {
         background-color: $color-primary;
         color: #fff;
+        box-shadow: 0 12px 24px -10px color.change($color-primary, $alpha: 0.5);
 
         &:hover:not(:disabled) {
             background-color: $color-primary-dark;
