@@ -24,7 +24,9 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    Route::resource('donations', DonationController::class)->only(['index', 'create', 'store']);
+    Route::resource('donations', DonationController::class)->only(['index', 'create', 'store', 'show']);
+    Route::patch('donations/{donation}/status', [DonationController::class, 'updateStatus'])
+        ->name('donations.update-status');
 });
 
 Route::middleware(['auth', 'can:manage-users'])->prefix('admin')->name('admin.')->group(function () {

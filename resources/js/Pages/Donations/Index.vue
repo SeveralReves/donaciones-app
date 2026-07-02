@@ -137,7 +137,7 @@ watch(
                                 </td>
                                 <td class="px-6 py-3 text-right">
                                     <Link
-                                        :href="`/donations/${donation.id}`"
+                                        :href="route('donations.show', donation.id)"
                                         class="text-indigo-600 hover:underline"
                                     >
                                         Ver detalle

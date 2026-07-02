@@ -16,6 +16,8 @@ const donationTypes = [
     { value: 'otros', label: 'Otros' },
 ];
 
+const itemUnits = ['unidades', 'cajas', 'kg', 'litros', 'paquetes', 'frascos'];
+
 const form = useForm({
     donation_type: 'insumos_medicos',
     location: '',
@@ -240,10 +242,23 @@ const submit = () => {
 
                                 <div class="col-span-3">
                                     <InputLabel :for="`item-unit-${index}`" value="Unidad" />
-                                    <TextInput
+                                    <select
                                         :id="`item-unit-${index}`"
                                         v-model="item.unit"
-                                        class="mt-1 block w-full"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    >
+                                        <option value="">Sin unidad</option>
+                                        <option
+                                            v-for="unit in itemUnits"
+                                            :key="unit"
+                                            :value="unit"
+                                        >
+                                            {{ unit }}
+                                        </option>
+                                    </select>
+                                    <InputError
+                                        class="mt-2"
+                                        :message="form.errors[`items.${index}.unit`]"
                                     />
                                 </div>
 

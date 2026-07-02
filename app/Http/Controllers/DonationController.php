@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDonationRequest;
+use App\Http\Requests\UpdateDonationStatusRequest;
 use App\Models\Donation;
 use App\Models\MedicalReceiver;
+use App\Services\DonationStatusFlow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -72,5 +74,56 @@ class DonationController extends Controller
         });
 
         return redirect()->route('donations.index');
+    }
+
+    public function show(Donation $donation): Response
+    {
+        $donation->load('items');
+
+        $statusLogs = $donation->statusLogs()
+            ->with('changedBy:id,name')
+            ->orderBy('changed_at')
+            ->get();
+
+        $nextStatus = DonationStatusFlow::nextStatus($donation->status);
+
+        return Inertia::render('Donations/Show', [
+            'donation' => $donation,
+            'statusLogs' => $statusLogs,
+            'nextStatus' => $nextStatus,
+            'missingFields' => $nextStatus
+                ? DonationStatusFlow::missingFields($donation, $nextStatus)
+                : [],
+            'fieldLabels' => DonationStatusFlow::fieldLabels(),
+        ]);
+    }
+
+    public function updateStatus(UpdateDonationStatusRequest $request, Donation $donation): RedirectResponse
+    {
+        $validated = $request->validated();
+        $targetStatus = $validated['status'];
+        unset($validated['status']);
+
+        DB::transaction(function () use ($donation, $targetStatus, $validated, $request): void {
+            $fromStatus = $donation->status;
+
+            foreach ($validated as $field => $value) {
+                if (filled($value)) {
+                    $donation->{$field} = $value;
+                }
+            }
+
+            $donation->status = $targetStatus;
+            $donation->save();
+
+            $donation->statusLogs()->create([
+                'from_status' => $fromStatus,
+                'to_status' => $targetStatus,
+                'changed_by' => $request->user()->id,
+                'changed_at' => now(),
+            ]);
+        });
+
+        return redirect()->route('donations.show', $donation);
     }
 }
