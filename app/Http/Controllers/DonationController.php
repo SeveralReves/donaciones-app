@@ -17,19 +17,30 @@ class DonationController extends Controller
 {
     public function index(Request $request): Response
     {
-        $filters = $request->only(['status', 'donation_type', 'location']);
+        $filters = $request->only(['status', 'donation_type', 'location', 'from', 'to']);
 
-        $donations = Donation::query()
-            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
+        $withCommonFilters = fn () => Donation::query()
             ->when($filters['donation_type'] ?? null, fn ($query, $type) => $query->where('donation_type', $type))
             ->when($filters['location'] ?? null, fn ($query, $location) => $query->where('location', 'like', "%{$location}%"))
+            ->when($filters['from'] ?? null, fn ($query, $from) => $query->whereDate('created_at', '>=', $from))
+            ->when($filters['to'] ?? null, fn ($query, $to) => $query->whereDate('created_at', '<=', $to));
+
+        $donations = $withCommonFilters()
+            ->when($filters['status'] ?? null, fn ($query, $status) => $query->where('status', $status))
+            ->with('creator:id,name')
             ->latest()
-            ->paginate(15)
+            ->paginate(20)
             ->withQueryString();
+
+        $statusCounts = $withCommonFilters()
+            ->select('status', DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
 
         return Inertia::render('Donations/Index', [
             'donations' => $donations,
             'filters' => $filters,
+            'statusCounts' => $statusCounts,
         ]);
     }
 
