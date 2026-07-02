@@ -1,0 +1,79 @@
+@use 'sass:color';
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// .btn — bloque de botón reutilizable. BEM: sin elementos, solo
+// modificadores de color (--primary/--secondary/--danger) y de layout
+// (--full, para ocupar el ancho completo en mobile).
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: $spacing-sm;
+    min-height: 44px;
+    padding: $spacing-sm $spacing-lg;
+    border: $border-width solid transparent;
+    border-radius: $border-radius;
+    font-family: inherit;
+    font-size: $font-size-base;
+    font-weight: 600;
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color 0.15s ease,
+        border-color 0.15s ease,
+        opacity 0.15s ease;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &--primary {
+        background-color: $color-primary;
+        color: #fff;
+
+        &:hover:not(:disabled) {
+            background-color: $color-primary-dark;
+        }
+    }
+
+    &--secondary {
+        background-color: $color-background;
+        color: $color-text;
+        border-color: $color-border;
+
+        &:hover:not(:disabled) {
+            background-color: $color-background-alt;
+        }
+    }
+
+    &--danger {
+        background-color: $color-danger;
+        color: #fff;
+
+        &:hover:not(:disabled) {
+            background-color: color.adjust($color-danger, $lightness: -8%);
+        }
+    }
+
+    // Reutiliza $color-success (mismo verde de estado "recibido") para las
+    // acciones de WhatsApp, que son la única acción de este tipo hoy.
+    &--success {
+        background-color: $color-success;
+        color: #fff;
+
+        &:hover:not(:disabled) {
+            background-color: color.adjust($color-success, $lightness: -8%);
+        }
+    }
+
+    &--full {
+        width: 100%;
+
+        @include respond(tablet) {
+            width: auto;
+        }
+    }
+}

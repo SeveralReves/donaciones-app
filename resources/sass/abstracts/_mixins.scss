@@ -1,0 +1,26 @@
+@use 'variables' as *;
+
+/// Media query mobile-first (min-width). El estilo base fuera del mixin es
+/// para mobile; @content aplica desde el breakpoint indicado hacia arriba.
+///
+/// Uso:
+///   .bloque {
+///       font-size: $font-size-base;
+///
+///       @include respond(tablet) {
+///           font-size: $font-size-lg;
+///       }
+///   }
+@mixin respond($breakpoint) {
+    @if $breakpoint == tablet {
+        @media (min-width: $breakpoint-tablet) {
+            @content;
+        }
+    } @else if $breakpoint == desktop {
+        @media (min-width: $breakpoint-desktop) {
+            @content;
+        }
+    } @else {
+        @warn "Breakpoint desconocido: '#{$breakpoint}'. Usa 'tablet' o 'desktop'.";
+    }
+}

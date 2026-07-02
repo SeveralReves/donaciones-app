@@ -1,9 +1,5 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { getDeliveryWhatsAppUrl, getReceiverWhatsAppUrl } from '@/utils/whatsapp';
@@ -97,12 +93,16 @@ const receiverWhatsAppUrl = computed(() =>
             </h2>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-4xl space-y-6 sm:px-6 lg:px-8">
+        <div class="container">
+            <div class="space-y-6">
                 <div class="bg-white p-6 shadow-sm sm:rounded-lg">
                     <h3 class="text-sm font-semibold text-gray-700">
                         Estado actual:
-                        <span class="font-mono">{{ donationStatusLabel(donation.status) }}</span>
+                        <span
+                            :class="`donation-card__status donation-card__status--${donation.status}`"
+                        >
+                            {{ donationStatusLabel(donation.status) }}
+                        </span>
                     </h3>
 
                     <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
@@ -181,14 +181,14 @@ const receiverWhatsAppUrl = computed(() =>
                         Enviar por WhatsApp
                     </h3>
 
-                    <div class="mt-4 flex flex-wrap gap-3">
+                    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                         <div v-if="deliveryAssigned && donation.delivery_contact">
                             <a
                                 v-if="deliveryWhatsAppUrl"
                                 :href="deliveryWhatsAppUrl"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-500"
+                                class="btn btn--success btn--full"
                             >
                                 Enviar mensaje al delivery
                             </a>
@@ -196,7 +196,7 @@ const receiverWhatsAppUrl = computed(() =>
                                 v-else
                                 type="button"
                                 disabled
-                                class="inline-flex items-center rounded-md bg-gray-200 px-4 py-2 text-sm text-gray-500"
+                                class="btn btn--secondary btn--full"
                             >
                                 Falta un número de contacto válido del delivery
                             </button>
@@ -208,7 +208,7 @@ const receiverWhatsAppUrl = computed(() =>
                                 :href="receiverWhatsAppUrl"
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                class="inline-flex items-center rounded-md bg-green-600 px-4 py-2 text-sm text-white hover:bg-green-500"
+                                class="btn btn--success btn--full"
                             >
                                 Enviar mensaje a quien recibe
                             </a>
@@ -216,7 +216,7 @@ const receiverWhatsAppUrl = computed(() =>
                                 v-else
                                 type="button"
                                 disabled
-                                class="inline-flex items-center rounded-md bg-gray-200 px-4 py-2 text-sm text-gray-500"
+                                class="btn btn--secondary btn--full"
                             >
                                 Falta un número de contacto válido de quien recibe
                             </button>
@@ -233,47 +233,55 @@ const receiverWhatsAppUrl = computed(() =>
                         <div
                             v-for="field in missingFields"
                             :key="field"
-                            class="mt-4"
+                            class="form-field mt-4"
                         >
-                            <InputLabel
-                                :for="field"
-                                :value="fieldLabels[field] ?? field"
-                            />
-                            <TextInput
+                            <label :for="field" class="form-field__label">
+                                {{ fieldLabels[field] ?? field }}
+                            </label>
+                            <input
                                 :id="field"
                                 v-model="statusForm[field]"
-                                class="mt-1 block w-full"
+                                type="text"
+                                class="form-field__input"
                                 required
                             />
-                            <InputError class="mt-2" :message="statusForm.errors[field]" />
+                            <p v-if="statusForm.errors[field]" class="form-field__error">
+                                {{ statusForm.errors[field] }}
+                            </p>
                         </div>
 
                         <div
                             v-for="field in optionalFields"
                             :key="field"
-                            class="mt-4"
+                            class="form-field mt-4"
                         >
-                            <InputLabel
-                                :for="field"
-                                :value="fieldLabels[field] ?? field"
-                            />
-                            <TextInput
+                            <label :for="field" class="form-field__label">
+                                {{ fieldLabels[field] ?? field }}
+                            </label>
+                            <input
                                 :id="field"
                                 v-model="statusForm[field]"
-                                class="mt-1 block w-full"
+                                type="text"
+                                class="form-field__input"
                             />
-                            <InputError class="mt-2" :message="statusForm.errors[field]" />
+                            <p v-if="statusForm.errors[field]" class="form-field__error">
+                                {{ statusForm.errors[field] }}
+                            </p>
                         </div>
 
-                        <InputError class="mt-2" :message="statusForm.errors.status" />
+                        <p v-if="statusForm.errors.status" class="form-field__error">
+                            {{ statusForm.errors.status }}
+                        </p>
 
                         <div class="mt-6">
-                            <PrimaryButton
+                            <button
+                                type="submit"
+                                class="btn btn--primary btn--full"
                                 :disabled="!canAdvance || statusForm.processing"
                                 :class="{ 'opacity-25': !canAdvance || statusForm.processing }"
                             >
                                 Avanzar a {{ donationStatusLabel(nextStatus) }}
-                            </PrimaryButton>
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -283,16 +291,16 @@ const receiverWhatsAppUrl = computed(() =>
                         Historial de estados
                     </h3>
 
-                    <ol class="mt-4 space-y-3 border-l border-gray-200 pl-4">
-                        <li v-for="log in statusLogs" :key="log.id" class="text-sm">
-                            <div class="text-gray-500">{{ formatDate(log.changed_at) }}</div>
-                            <div>
-                                <span v-if="log.from_status" class="font-mono">{{ donationStatusLabel(log.from_status) }}</span>
-                                <span v-else class="italic text-gray-500">inicio</span>
+                    <ol class="status-timeline mt-4">
+                        <li v-for="log in statusLogs" :key="log.id" class="status-timeline__item">
+                            <div class="status-timeline__date">{{ formatDate(log.changed_at) }}</div>
+                            <div class="status-timeline__transition">
+                                <span v-if="log.from_status">{{ donationStatusLabel(log.from_status) }}</span>
+                                <span v-else class="italic">inicio</span>
                                 →
-                                <span class="font-mono">{{ donationStatusLabel(log.to_status) }}</span>
+                                <span>{{ donationStatusLabel(log.to_status) }}</span>
                             </div>
-                            <div class="text-gray-500">
+                            <div class="status-timeline__actor">
                                 por {{ log.changed_by?.name ?? '—' }}
                             </div>
                         </li>

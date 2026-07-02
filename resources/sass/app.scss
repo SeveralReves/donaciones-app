@@ -1,0 +1,22 @@
+// ==========================================================================
+// app.scss — punto de entrada. Importa (vía @use) todos los parciales en
+// orden: abstracts -> base -> layout -> components.
+//
+// No usar Bootstrap, Tailwind ni ningún framework de CSS acá. Metodología
+// BEM para nombrar clases de componentes, mobile-first en los estilos
+// (base = mobile, @include respond(...) para tablet/desktop hacia arriba).
+// ==========================================================================
+
+// Base: reset y tipografía. Ambos ya resuelven internamente su @use de
+// abstracts/variables y abstracts/mixins.
+@use 'base/reset';
+@use 'base/typography';
+
+// Layout: estructuras de página (grid, contenedores, header/footer).
+@use 'layout/container';
+
+// Components: bloques BEM reutilizables.
+@use 'components/button';
+@use 'components/form';
+@use 'components/card';
+@use 'components/timeline';

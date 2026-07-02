@@ -89,148 +89,138 @@ watch(
                     Donaciones
                 </h2>
 
-                <Link
-                    :href="route('donations.create')"
-                    class="rounded-md bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700"
-                >
+                <Link :href="route('donations.create')" class="btn btn--primary">
                     Nueva donación
                 </Link>
             </div>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                <div class="mb-4 flex flex-wrap gap-3 rounded-md bg-white p-4 text-sm shadow-sm">
-                    <span
-                        v-for="status in statuses"
-                        :key="status"
-                        class="rounded-full bg-gray-100 px-3 py-1"
+        <div class="container">
+            <div class="mb-4 flex flex-wrap gap-2">
+                <span
+                    v-for="status in statuses"
+                    :key="status"
+                    :class="`donation-card__status donation-card__status--${status}`"
+                >
+                    {{ statusCounts[status] ?? 0 }} {{ donationStatusLabel(status) }}
+                </span>
+            </div>
+
+            <div class="mb-4 flex flex-wrap items-end gap-4 rounded-md bg-white p-4 shadow-sm">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Estado</label>
+                    <select
+                        v-model="filters.status"
+                        class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
-                        {{ statusCounts[status] ?? 0 }} {{ donationStatusLabel(status) }}
-                    </span>
+                        <option value="">Todos</option>
+                        <option v-for="status in statuses" :key="status" :value="status">
+                            {{ donationStatusLabel(status) }}
+                        </option>
+                    </select>
                 </div>
 
-                <div class="mb-4 flex flex-wrap items-end gap-4 rounded-md bg-white p-4 shadow-sm">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Estado</label>
-                        <select
-                            v-model="filters.status"
-                            class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        >
-                            <option value="">Todos</option>
-                            <option v-for="status in statuses" :key="status" :value="status">
-                                {{ donationStatusLabel(status) }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Tipo</label>
-                        <select
-                            v-model="filters.donation_type"
-                            class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        >
-                            <option value="">Todos</option>
-                            <option v-for="type in donationTypes" :key="type" :value="type">
-                                {{ donationTypeLabel(type) }}
-                            </option>
-                        </select>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Ubicación</label>
-                        <input
-                            v-model="filters.location"
-                            type="text"
-                            placeholder="Buscar ubicación..."
-                            class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Desde</label>
-                        <input
-                            v-model="filters.from"
-                            type="date"
-                            class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        />
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Hasta</label>
-                        <input
-                            v-model="filters.to"
-                            type="date"
-                            class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                        />
-                    </div>
-
-                    <button
-                        v-if="hasActiveFilters"
-                        type="button"
-                        @click="clearFilters"
-                        class="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Tipo</label>
+                    <select
+                        v-model="filters.donation_type"
+                        class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     >
-                        Borrar filtros
-                    </button>
+                        <option value="">Todos</option>
+                        <option v-for="type in donationTypes" :key="type" :value="type">
+                            {{ donationTypeLabel(type) }}
+                        </option>
+                    </select>
                 </div>
 
-                <div class="overflow-hidden bg-white shadow-sm sm:rounded-lg">
-                    <table class="w-full text-left text-sm">
-                        <thead class="border-b bg-gray-50">
-                            <tr>
-                                <th class="px-6 py-3">Tipo</th>
-                                <th class="px-6 py-3">Ubicación</th>
-                                <th class="px-6 py-3">Estado</th>
-                                <th class="px-6 py-3">Fecha</th>
-                                <th class="px-6 py-3">Creado por</th>
-                                <th class="px-6 py-3"></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr
-                                v-for="donation in donations.data"
-                                :key="donation.id"
-                                class="border-b last:border-0"
-                            >
-                                <td class="px-6 py-3">{{ donationTypeLabel(donation.donation_type) }}</td>
-                                <td class="px-6 py-3">{{ donation.location }}</td>
-                                <td class="px-6 py-3">{{ donationStatusLabel(donation.status) }}</td>
-                                <td class="px-6 py-3">
-                                    {{ new Date(donation.created_at).toLocaleDateString() }}
-                                </td>
-                                <td class="px-6 py-3">{{ donation.creator?.name ?? '—' }}</td>
-                                <td class="px-6 py-3 text-right">
-                                    <Link
-                                        :href="route('donations.show', donation.id)"
-                                        class="text-indigo-600 hover:underline"
-                                    >
-                                        Ver detalle
-                                    </Link>
-                                </td>
-                            </tr>
-                            <tr v-if="donations.data.length === 0">
-                                <td colspan="6" class="px-6 py-6 text-center text-gray-500">
-                                    No hay donaciones que coincidan con los filtros.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-
-                <div class="mt-4 flex flex-wrap gap-2">
-                    <Link
-                        v-for="link in donations.links"
-                        :key="link.label"
-                        :href="link.url ?? '#'"
-                        v-html="paginationLabel(link.label)"
-                        class="rounded-md border px-3 py-1 text-sm"
-                        :class="{
-                            'bg-indigo-600 text-white': link.active,
-                            'text-gray-400 pointer-events-none': !link.url,
-                        }"
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Ubicación</label>
+                    <input
+                        v-model="filters.location"
+                        type="text"
+                        placeholder="Buscar ubicación..."
+                        class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                     />
                 </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Desde</label>
+                    <input
+                        v-model="filters.from"
+                        type="date"
+                        class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-gray-700">Hasta</label>
+                    <input
+                        v-model="filters.to"
+                        type="date"
+                        class="mt-1 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                    />
+                </div>
+
+                <button
+                    v-if="hasActiveFilters"
+                    type="button"
+                    @click="clearFilters"
+                    class="rounded-md border border-gray-300 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50"
+                >
+                    Borrar filtros
+                </button>
+            </div>
+
+            <div v-if="donations.data.length === 0" class="rounded-md bg-white p-6 text-center text-sm text-gray-500 shadow-sm">
+                No hay donaciones que coincidan con los filtros.
+            </div>
+
+            <div v-else class="donation-grid">
+                <article
+                    v-for="donation in donations.data"
+                    :key="donation.id"
+                    class="donation-card"
+                >
+                    <header class="donation-card__header">
+                        <span class="donation-card__title">
+                            {{ donationTypeLabel(donation.donation_type) }}
+                        </span>
+                        <span
+                            :class="`donation-card__status donation-card__status--${donation.status}`"
+                        >
+                            {{ donationStatusLabel(donation.status) }}
+                        </span>
+                    </header>
+
+                    <div class="donation-card__body">
+                        <div>{{ donation.location }}</div>
+                        <div>{{ new Date(donation.created_at).toLocaleDateString() }}</div>
+                        <div>Creado por {{ donation.creator?.name ?? '—' }}</div>
+                    </div>
+
+                    <div class="donation-card__footer">
+                        <Link
+                            :href="route('donations.show', donation.id)"
+                            class="btn btn--secondary btn--full"
+                        >
+                            Ver detalle
+                        </Link>
+                    </div>
+                </article>
+            </div>
+
+            <div class="mt-4 flex flex-wrap gap-2">
+                <Link
+                    v-for="link in donations.links"
+                    :key="link.label"
+                    :href="link.url ?? '#'"
+                    v-html="paginationLabel(link.label)"
+                    class="rounded-md border px-3 py-1 text-sm"
+                    :class="{
+                        'bg-indigo-600 text-white': link.active,
+                        'text-gray-400 pointer-events-none': !link.url,
+                    }"
+                />
             </div>
         </div>
     </AuthenticatedLayout>

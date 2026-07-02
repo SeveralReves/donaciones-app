@@ -1,0 +1,97 @@
+@use 'sass:color';
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// .donation-card — representa una donación en el listado.
+.donation-card {
+    display: flex;
+    flex-direction: column;
+    border: $border-width solid $color-border;
+    border-radius: $border-radius;
+    background-color: $color-background;
+    overflow: hidden;
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: $spacing-sm;
+        padding: $spacing-md;
+        border-bottom: $border-width solid $color-border;
+    }
+
+    &__title {
+        font-size: $font-size-base;
+        font-weight: 600;
+        color: $color-text;
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-xs;
+        padding: $spacing-md;
+        font-size: $font-size-sm;
+        color: $color-text-light;
+    }
+
+    &__footer {
+        padding: $spacing-md;
+        border-top: $border-width solid $color-border;
+        margin-top: auto;
+    }
+
+    // Etiqueta de estado, un color distinto por cada uno de los 5 estados
+    // posibles de una donación (nombres tal cual vienen del backend, con
+    // guion bajo, para poder generar la clase directamente desde JS).
+    &__status {
+        display: inline-flex;
+        align-items: center;
+        padding: $spacing-xs $spacing-sm;
+        border-radius: 999px;
+        font-size: $font-size-sm;
+        font-weight: 600;
+        white-space: nowrap;
+
+        &--creada {
+            background-color: color.change($color-info, $alpha: 0.12);
+            color: $color-info;
+        }
+
+        &--en_proceso {
+            background-color: color.change($color-warning, $alpha: 0.12);
+            color: $color-warning;
+        }
+
+        &--esperando_delivery {
+            background-color: color.change($color-secondary, $alpha: 0.15);
+            color: $color-secondary;
+        }
+
+        &--en_camino {
+            background-color: color.change($color-primary, $alpha: 0.12);
+            color: $color-primary;
+        }
+
+        &--recibido {
+            background-color: color.change($color-success, $alpha: 0.12);
+            color: $color-success;
+        }
+    }
+}
+
+// .donation-grid — contenedor de tarjetas: apiladas en mobile, 2 columnas
+// en tablet, 3 en desktop.
+.donation-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: $spacing-md;
+
+    @include respond(tablet) {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    @include respond(desktop) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}

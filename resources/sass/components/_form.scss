@@ -1,0 +1,62 @@
+@use 'sass:color';
+@use '../abstracts/variables' as *;
+
+// .form-field — bloque para un campo de formulario completo (label + input
+// + error). Mobile-first: inputs a ancho completo y con área táctil >= 44px
+// desde la base, sin necesitar media queries para mobile.
+.form-field {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-bottom: $spacing-md;
+
+    &__label {
+        display: block;
+        margin-bottom: $spacing-xs;
+        font-size: $font-size-sm;
+        font-weight: 600;
+        color: $color-text;
+    }
+
+    &__input,
+    &__select {
+        width: 100%;
+        min-height: 44px;
+        padding: $spacing-sm $spacing-md;
+        border: $border-width solid $color-border;
+        border-radius: $border-radius;
+        font-family: inherit;
+        font-size: $font-size-base;
+        color: $color-text;
+        background-color: $color-background;
+        transition:
+            border-color 0.15s ease,
+            box-shadow 0.15s ease;
+
+        &:focus {
+            outline: none;
+            border-color: $color-primary;
+            box-shadow: 0 0 0 3px color.change($color-primary, $alpha: 0.15);
+        }
+
+        &:disabled {
+            background-color: $color-background-alt;
+            cursor: not-allowed;
+        }
+    }
+
+    &__select {
+        appearance: none;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%236b7280'%3E%3Cpath fill-rule='evenodd' d='M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z' clip-rule='evenodd'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right $spacing-sm center;
+        background-size: 1.25em 1.25em;
+        padding-right: $spacing-xl;
+    }
+
+    &__error {
+        margin-top: $spacing-xs;
+        font-size: $font-size-sm;
+        color: $color-danger;
+    }
+}

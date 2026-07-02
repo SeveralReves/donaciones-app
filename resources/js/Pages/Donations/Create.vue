@@ -1,11 +1,5 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import PrimaryButton from '@/Components/PrimaryButton.vue';
-import SecondaryButton from '@/Components/SecondaryButton.vue';
-import DangerButton from '@/Components/DangerButton.vue';
-import TextInput from '@/Components/TextInput.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -59,231 +53,231 @@ const submit = () => {
             </h2>
         </template>
 
-        <div class="py-12">
-            <div class="mx-auto max-w-3xl sm:px-6 lg:px-8">
-                <div class="bg-white p-6 shadow-sm sm:rounded-lg">
-                    <form @submit.prevent="submit">
-                        <div>
-                            <InputLabel for="donation_type" value="Tipo de donación" />
-                            <select
-                                id="donation_type"
-                                v-model="form.donation_type"
-                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
-                                required
+        <div class="container">
+            <div class="bg-white p-6 shadow-sm sm:rounded-lg">
+                <form @submit.prevent="submit">
+                    <div class="form-field">
+                        <label for="donation_type" class="form-field__label">Tipo de donación</label>
+                        <select
+                            id="donation_type"
+                            v-model="form.donation_type"
+                            class="form-field__select"
+                            required
+                        >
+                            <option
+                                v-for="type in donationTypes"
+                                :key="type.value"
+                                :value="type.value"
                             >
-                                <option
-                                    v-for="type in donationTypes"
-                                    :key="type.value"
-                                    :value="type.value"
+                                {{ type.label }}
+                            </option>
+                        </select>
+                        <p v-if="form.errors.donation_type" class="form-field__error">
+                            {{ form.errors.donation_type }}
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="location" class="form-field__label">Ubicación</label>
+                        <input
+                            id="location"
+                            v-model="form.location"
+                            type="text"
+                            class="form-field__input"
+                            required
+                        />
+                        <p v-if="form.errors.location" class="form-field__error">
+                            {{ form.errors.location }}
+                        </p>
+                    </div>
+
+                    <div class="form-field">
+                        <label for="patient_name" class="form-field__label">Nombre del paciente</label>
+                        <input
+                            id="patient_name"
+                            v-model="form.patient_name"
+                            type="text"
+                            class="form-field__input"
+                        />
+                        <p v-if="form.errors.patient_name" class="form-field__error">
+                            {{ form.errors.patient_name }}
+                        </p>
+                    </div>
+
+                    <div class="mt-8 border-t pt-6">
+                        <h3 class="text-sm font-semibold text-gray-700">
+                            Médico / responsable que recibe
+                            <span v-if="requiresDoctor" class="text-red-600">
+                                (obligatorio para insumos médicos)
+                            </span>
+                        </h3>
+
+                        <div class="form-field mt-4">
+                            <label for="receiving_doctor_name" class="form-field__label">Nombre</label>
+                            <input
+                                id="receiving_doctor_name"
+                                v-model="form.receiving_doctor_name"
+                                type="text"
+                                class="form-field__input"
+                            />
+                            <p v-if="form.errors.receiving_doctor_name" class="form-field__error">
+                                {{ form.errors.receiving_doctor_name }}
+                            </p>
+                        </div>
+
+                        <div v-if="requiresDoctor" class="form-field">
+                            <label for="receiving_doctor_code" class="form-field__label">Código médico</label>
+                            <input
+                                id="receiving_doctor_code"
+                                v-model="form.receiving_doctor_code"
+                                type="text"
+                                class="form-field__input"
+                                required
+                            />
+                            <p v-if="form.errors.receiving_doctor_code" class="form-field__error">
+                                {{ form.errors.receiving_doctor_code }}
+                            </p>
+                        </div>
+
+                        <div v-if="requiresDoctor" class="form-field">
+                            <label for="receiving_service" class="form-field__label">Servicio</label>
+                            <input
+                                id="receiving_service"
+                                v-model="form.receiving_service"
+                                type="text"
+                                class="form-field__input"
+                                required
+                            />
+                            <p v-if="form.errors.receiving_service" class="form-field__error">
+                                {{ form.errors.receiving_service }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 border-t pt-6">
+                        <h3 class="text-sm font-semibold text-gray-700">
+                            Contacto
+                        </h3>
+
+                        <div class="form-field mt-4">
+                            <label for="contact_number" class="form-field__label">Número de contacto</label>
+                            <input
+                                id="contact_number"
+                                v-model="form.contact_number"
+                                type="text"
+                                class="form-field__input"
+                            />
+                            <p v-if="form.errors.contact_number" class="form-field__error">
+                                {{ form.errors.contact_number }}
+                            </p>
+                        </div>
+
+                        <div class="form-field">
+                            <label for="cedula" class="form-field__label">Cédula</label>
+                            <input
+                                id="cedula"
+                                v-model="form.cedula"
+                                type="text"
+                                class="form-field__input"
+                            />
+                            <p v-if="form.errors.cedula" class="form-field__error">
+                                {{ form.errors.cedula }}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="mt-8 border-t pt-6">
+                        <div class="flex items-center justify-between">
+                            <h3 class="text-sm font-semibold text-gray-700">
+                                Artículos donados
+                            </h3>
+                            <button type="button" class="btn btn--secondary" @click="addItem">
+                                Agregar artículo
+                            </button>
+                        </div>
+                        <p v-if="form.errors.items" class="form-field__error">
+                            {{ form.errors.items }}
+                        </p>
+
+                        <div
+                            v-for="(item, index) in form.items"
+                            :key="index"
+                            class="mt-4 grid grid-cols-12 gap-2 rounded-md border border-gray-200 p-3"
+                        >
+                            <div class="form-field col-span-12 sm:col-span-5">
+                                <label :for="`item-name-${index}`" class="form-field__label">Nombre</label>
+                                <input
+                                    :id="`item-name-${index}`"
+                                    v-model="item.name"
+                                    type="text"
+                                    class="form-field__input"
+                                    required
+                                />
+                                <p v-if="form.errors[`items.${index}.name`]" class="form-field__error">
+                                    {{ form.errors[`items.${index}.name`] }}
+                                </p>
+                            </div>
+
+                            <div class="form-field col-span-6 sm:col-span-3">
+                                <label :for="`item-quantity-${index}`" class="form-field__label">Cantidad</label>
+                                <input
+                                    :id="`item-quantity-${index}`"
+                                    v-model="item.quantity"
+                                    type="number"
+                                    step="0.01"
+                                    class="form-field__input"
+                                    required
+                                />
+                                <p v-if="form.errors[`items.${index}.quantity`]" class="form-field__error">
+                                    {{ form.errors[`items.${index}.quantity`] }}
+                                </p>
+                            </div>
+
+                            <div class="form-field col-span-6 sm:col-span-3">
+                                <label :for="`item-unit-${index}`" class="form-field__label">Unidad</label>
+                                <select
+                                    :id="`item-unit-${index}`"
+                                    v-model="item.unit"
+                                    class="form-field__select"
                                 >
-                                    {{ type.label }}
-                                </option>
-                            </select>
-                            <InputError class="mt-2" :message="form.errors.donation_type" />
-                        </div>
-
-                        <div class="mt-4">
-                            <InputLabel for="location" value="Ubicación" />
-                            <TextInput
-                                id="location"
-                                v-model="form.location"
-                                class="mt-1 block w-full"
-                                required
-                            />
-                            <InputError class="mt-2" :message="form.errors.location" />
-                        </div>
-
-                        <div class="mt-4">
-                            <InputLabel for="patient_name" value="Nombre del paciente" />
-                            <TextInput
-                                id="patient_name"
-                                v-model="form.patient_name"
-                                class="mt-1 block w-full"
-                            />
-                            <InputError class="mt-2" :message="form.errors.patient_name" />
-                        </div>
-
-                        <div class="mt-8 border-t pt-6">
-                            <h3 class="text-sm font-semibold text-gray-700">
-                                Médico / responsable que recibe
-                                <span v-if="requiresDoctor" class="text-red-600">
-                                    (obligatorio para insumos médicos)
-                                </span>
-                            </h3>
-
-                            <div class="mt-4">
-                                <InputLabel
-                                    for="receiving_doctor_name"
-                                    value="Nombre"
-                                />
-                                <TextInput
-                                    id="receiving_doctor_name"
-                                    v-model="form.receiving_doctor_name"
-                                    class="mt-1 block w-full"
-                                />
-                                <InputError
-                                    class="mt-2"
-                                    :message="form.errors.receiving_doctor_name"
-                                />
-                            </div>
-
-                            <div v-if="requiresDoctor" class="mt-4">
-                                <InputLabel
-                                    for="receiving_doctor_code"
-                                    value="Código médico"
-                                />
-                                <TextInput
-                                    id="receiving_doctor_code"
-                                    v-model="form.receiving_doctor_code"
-                                    class="mt-1 block w-full"
-                                    required
-                                />
-                                <InputError
-                                    class="mt-2"
-                                    :message="form.errors.receiving_doctor_code"
-                                />
-                            </div>
-
-                            <div v-if="requiresDoctor" class="mt-4">
-                                <InputLabel
-                                    for="receiving_service"
-                                    value="Servicio"
-                                />
-                                <TextInput
-                                    id="receiving_service"
-                                    v-model="form.receiving_service"
-                                    class="mt-1 block w-full"
-                                    required
-                                />
-                                <InputError
-                                    class="mt-2"
-                                    :message="form.errors.receiving_service"
-                                />
-                            </div>
-                        </div>
-
-                        <div class="mt-8 border-t pt-6">
-                            <h3 class="text-sm font-semibold text-gray-700">
-                                Contacto
-                            </h3>
-
-                            <div class="mt-4">
-                                <InputLabel
-                                    for="contact_number"
-                                    value="Número de contacto"
-                                />
-                                <TextInput
-                                    id="contact_number"
-                                    v-model="form.contact_number"
-                                    class="mt-1 block w-full"
-                                />
-                                <InputError
-                                    class="mt-2"
-                                    :message="form.errors.contact_number"
-                                />
-                            </div>
-
-                            <div class="mt-4">
-                                <InputLabel for="cedula" value="Cédula" />
-                                <TextInput
-                                    id="cedula"
-                                    v-model="form.cedula"
-                                    class="mt-1 block w-full"
-                                />
-                                <InputError class="mt-2" :message="form.errors.cedula" />
-                            </div>
-                        </div>
-
-                        <div class="mt-8 border-t pt-6">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-semibold text-gray-700">
-                                    Artículos donados
-                                </h3>
-                                <SecondaryButton type="button" @click="addItem">
-                                    Agregar artículo
-                                </SecondaryButton>
-                            </div>
-                            <InputError class="mt-2" :message="form.errors.items" />
-
-                            <div
-                                v-for="(item, index) in form.items"
-                                :key="index"
-                                class="mt-4 grid grid-cols-12 gap-2 rounded-md border border-gray-200 p-3"
-                            >
-                                <div class="col-span-5">
-                                    <InputLabel :for="`item-name-${index}`" value="Nombre" />
-                                    <TextInput
-                                        :id="`item-name-${index}`"
-                                        v-model="item.name"
-                                        class="mt-1 block w-full"
-                                        required
-                                    />
-                                    <InputError
-                                        class="mt-2"
-                                        :message="form.errors[`items.${index}.name`]"
-                                    />
-                                </div>
-
-                                <div class="col-span-3">
-                                    <InputLabel :for="`item-quantity-${index}`" value="Cantidad" />
-                                    <TextInput
-                                        :id="`item-quantity-${index}`"
-                                        v-model="item.quantity"
-                                        type="number"
-                                        step="0.01"
-                                        class="mt-1 block w-full"
-                                        required
-                                    />
-                                    <InputError
-                                        class="mt-2"
-                                        :message="form.errors[`items.${index}.quantity`]"
-                                    />
-                                </div>
-
-                                <div class="col-span-3">
-                                    <InputLabel :for="`item-unit-${index}`" value="Unidad" />
-                                    <select
-                                        :id="`item-unit-${index}`"
-                                        v-model="item.unit"
-                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    <option value="">Sin unidad</option>
+                                    <option
+                                        v-for="unit in itemUnits"
+                                        :key="unit"
+                                        :value="unit"
                                     >
-                                        <option value="">Sin unidad</option>
-                                        <option
-                                            v-for="unit in itemUnits"
-                                            :key="unit"
-                                            :value="unit"
-                                        >
-                                            {{ unit }}
-                                        </option>
-                                    </select>
-                                    <InputError
-                                        class="mt-2"
-                                        :message="form.errors[`items.${index}.unit`]"
-                                    />
-                                </div>
+                                        {{ unit }}
+                                    </option>
+                                </select>
+                                <p v-if="form.errors[`items.${index}.unit`]" class="form-field__error">
+                                    {{ form.errors[`items.${index}.unit`] }}
+                                </p>
+                            </div>
 
-                                <div class="col-span-1 flex items-end justify-end">
-                                    <DangerButton
-                                        type="button"
-                                        :disabled="form.items.length <= 1"
-                                        @click="removeItem(index)"
-                                    >
-                                        X
-                                    </DangerButton>
-                                </div>
+                            <div class="col-span-12 flex items-end justify-end sm:col-span-1">
+                                <button
+                                    type="button"
+                                    class="btn btn--danger"
+                                    :disabled="form.items.length <= 1"
+                                    @click="removeItem(index)"
+                                >
+                                    X
+                                </button>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="mt-6 flex items-center justify-end">
-                            <PrimaryButton
-                                :class="{ 'opacity-25': form.processing }"
-                                :disabled="form.processing"
-                            >
-                                Crear donación
-                            </PrimaryButton>
-                        </div>
-                    </form>
-                </div>
+                    <div class="mt-6">
+                        <button
+                            type="submit"
+                            class="btn btn--primary btn--full"
+                            :class="{ 'opacity-25': form.processing }"
+                            :disabled="form.processing"
+                        >
+                            Crear donación
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </AuthenticatedLayout>
