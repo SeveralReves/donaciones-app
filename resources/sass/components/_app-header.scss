@@ -1,0 +1,282 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// .app-shell — envoltorio de toda pantalla autenticada. El padding inferior
+// deja espacio para la barra de navegación fija en mobile.
+.app-shell {
+    min-height: 100vh;
+    padding-bottom: 80px;
+
+    @include respond(tablet) {
+        padding-bottom: 0;
+    }
+}
+
+// .app-header — barra superior verde fija, con logo, navegación y acciones.
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background-color: $color-primary-dark;
+
+    &__inner {
+        margin-inline: auto;
+        display: flex;
+        height: 62px;
+        max-width: 1180px;
+        align-items: center;
+        justify-content: space-between;
+        gap: $spacing-md;
+        padding-inline: $spacing-md;
+
+        @include respond(tablet) {
+            padding-inline: $spacing-lg;
+        }
+    }
+
+    &__brand-group {
+        display: flex;
+        min-width: 0;
+        align-items: center;
+        gap: $spacing-md;
+
+        @include respond(tablet) {
+            gap: 1.75rem;
+        }
+    }
+
+    &__brand {
+        display: flex;
+        flex: none;
+        align-items: center;
+        gap: 11px;
+    }
+
+    &__mark {
+        display: flex;
+        flex: none;
+        height: 36px;
+        width: 36px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        background-color: $color-accent;
+    }
+
+    &__mark-icon {
+        position: relative;
+        display: block;
+        height: 15px;
+        width: 15px;
+    }
+
+    &__mark-bar {
+        position: absolute;
+        border-radius: 2px;
+        background-color: $color-primary-dark;
+
+        &--h {
+            left: 0;
+            top: 6px;
+            height: 3px;
+            width: 15px;
+        }
+
+        &--v {
+            left: 6px;
+            top: 0;
+            height: 15px;
+            width: 3px;
+        }
+    }
+
+    &__brand-name {
+        display: none;
+        line-height: 1.1;
+        font-size: 17px;
+        font-weight: 700;
+        letter-spacing: -0.01em;
+        color: #fff;
+
+        @include respond(tablet) {
+            display: block;
+        }
+    }
+
+    &__nav {
+        display: none;
+        align-items: center;
+        gap: 0.25rem;
+
+        @include respond(tablet) {
+            display: flex;
+        }
+    }
+
+    &__nav-link {
+        border-radius: 0.5rem;
+        padding: $spacing-sm 15px;
+        font-size: $font-size-sm;
+        font-weight: 500;
+        color: #bfe0cd;
+
+        &:hover {
+            color: #fff;
+        }
+
+        &--active {
+            background-color: rgba(255, 255, 255, 0.15);
+            font-weight: 600;
+            color: #fff;
+
+            &:hover {
+                color: #fff;
+            }
+        }
+    }
+
+    &__actions {
+        display: flex;
+        align-items: center;
+        gap: $spacing-md;
+
+        @include respond(tablet) {
+            gap: 14px;
+        }
+    }
+
+    &__cta {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        white-space: nowrap;
+        border-radius: 10px;
+        background-color: $color-accent;
+        padding: 10px $spacing-md;
+        font-size: 13px;
+        font-weight: 700;
+        color: $color-primary-dark;
+
+        @include respond(tablet) {
+            padding-inline: 1rem;
+            font-size: $font-size-sm;
+        }
+    }
+
+    &__cta-icon {
+        font-size: 1rem;
+        line-height: 1;
+    }
+
+    &__cta-label {
+        display: none;
+
+        @include respond(tablet) {
+            display: inline;
+        }
+    }
+
+    &__user-trigger {
+        display: flex;
+        align-items: center;
+        gap: $spacing-sm;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-family: inherit;
+    }
+
+    &__avatar {
+        display: flex;
+        height: 32px;
+        width: 32px;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background-color: rgba(255, 255, 255, 0.18);
+        font-size: 13px;
+        font-weight: 600;
+        color: #fff;
+    }
+
+    &__user-name {
+        display: none;
+        font-size: 13px;
+        font-weight: 500;
+        color: #d6ebde;
+
+        @include respond(tablet) {
+            display: inline;
+        }
+    }
+}
+
+// .page-header — barra blanca de título de página (usada por pantallas que
+// aún no adoptan el título integrado en el contenido, p. ej. perfil).
+.page-header {
+    background-color: $color-background;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    &__inner {
+        margin-inline: auto;
+        max-width: 1180px;
+        padding: $spacing-lg $spacing-md;
+
+        @include respond(tablet) {
+            padding-inline: $spacing-lg;
+        }
+    }
+
+    &__title {
+        font-size: 1.25rem;
+        font-weight: 600;
+        line-height: 1.2;
+        color: #1f2937;
+    }
+}
+
+// .bottom-nav — navegación fija inferior, solo en mobile.
+.bottom-nav {
+    position: fixed;
+    inset-inline: 0;
+    bottom: 0;
+    z-index: 30;
+    display: flex;
+    border-top: $border-width solid #e2ebe7;
+    background-color: $color-background;
+    padding: $spacing-sm 6px 12px;
+
+    @include respond(tablet) {
+        display: none;
+    }
+
+    &__item {
+        flex: 1;
+        text-align: center;
+    }
+
+    &__dot {
+        margin-inline: auto;
+        margin-bottom: 5px;
+        display: block;
+        height: 5px;
+        width: 5px;
+        border-radius: 50%;
+        background-color: transparent;
+
+        &--active {
+            background-color: $color-primary;
+        }
+    }
+
+    &__label {
+        font-size: 11px;
+        font-weight: 500;
+        color: $color-text-muted;
+
+        &--active {
+            font-weight: 700;
+            color: $color-primary;
+        }
+    }
+}

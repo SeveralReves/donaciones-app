@@ -97,18 +97,18 @@ const donSubtitle = computed(() =>
     <Head title="Donaciones" />
 
     <AuthenticatedLayout>
-        <div class="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
-            <div class="mb-[18px] flex flex-wrap items-center justify-between gap-3.5">
+        <div class="page donations-index">
+            <div class="donations-index__header">
                 <div>
-                    <h1 class="mb-0.5">Donaciones</h1>
-                    <p class="text-sm font-normal text-[#7a8b84]">{{ donSubtitle }}</p>
+                    <h1 class="donations-index__title">Donaciones</h1>
+                    <p class="donations-index__subtitle">{{ donSubtitle }}</p>
                 </div>
                 <Link :href="route('donations.create')" class="btn btn--primary">
-                    <span class="text-[17px] leading-none">+</span> Nueva donación
+                    <span class="donations-index__cta-icon">+</span> Nueva donación
                 </Link>
             </div>
 
-            <div class="mb-4 flex flex-wrap gap-2">
+            <div class="donations-index__chips">
                 <button
                     type="button"
                     class="chip chip--pill"
@@ -129,8 +129,8 @@ const donSubtitle = computed(() =>
                 </button>
             </div>
 
-            <div class="mb-4 flex flex-wrap items-end gap-4 rounded-2xl border border-[#e6ede9] bg-white p-4">
-                <div class="form-field !mb-0 w-auto min-w-[160px] flex-1">
+            <div class="surface donations-index__filters">
+                <div class="form-field donations-index__filter-field donations-index__filter-field--type">
                     <label class="form-field__label">Tipo</label>
                     <select v-model="filters.donation_type" class="form-field__select">
                         <option value="">Todos</option>
@@ -140,7 +140,7 @@ const donSubtitle = computed(() =>
                     </select>
                 </div>
 
-                <div class="form-field !mb-0 w-auto min-w-[200px] flex-1">
+                <div class="form-field donations-index__filter-field donations-index__filter-field--location">
                     <label class="form-field__label">Ubicación</label>
                     <input
                         v-model="filters.location"
@@ -150,12 +150,12 @@ const donSubtitle = computed(() =>
                     />
                 </div>
 
-                <div class="form-field !mb-0 w-auto flex-1">
+                <div class="form-field donations-index__filter-field">
                     <label class="form-field__label">Desde</label>
                     <input v-model="filters.from" type="date" class="form-field__input" />
                 </div>
 
-                <div class="form-field !mb-0 w-auto flex-1">
+                <div class="form-field donations-index__filter-field">
                     <label class="form-field__label">Hasta</label>
                     <input v-model="filters.to" type="date" class="form-field__input" />
                 </div>
@@ -170,8 +170,8 @@ const donSubtitle = computed(() =>
                 </button>
             </div>
 
-            <div class="overflow-hidden rounded-2xl border border-[#e6ede9] bg-white">
-                <div v-if="donations.data.length === 0" class="p-11 text-center text-sm font-medium text-[#8a969a]">
+            <div class="donations-index__list">
+                <div v-if="donations.data.length === 0" class="donations-index__empty">
                     No hay donaciones que coincidan con los filtros.
                 </div>
 
@@ -179,20 +179,20 @@ const donSubtitle = computed(() =>
                     v-for="donation in donations.data"
                     :key="donation.id"
                     :href="route('donations.show', donation.id)"
-                    class="flex items-center gap-3.5 border-b border-[#f1f4f3] px-4 py-[15px] last:border-0 hover:bg-[#f8faf9] sm:px-[22px]"
+                    class="donations-index__row"
                 >
                     <span class="avatar avatar--square avatar--lg">
                         {{ donationTypeLabel(donation.donation_type).charAt(0) }}
                     </span>
-                    <div class="min-w-0 flex-1">
-                        <div class="truncate text-[14.5px] font-semibold">
+                    <div class="donations-index__row-info">
+                        <div class="donations-index__row-title">
                             {{ donationTypeLabel(donation.donation_type) }} — {{ donation.location }}
                         </div>
-                        <div class="text-xs text-[#8a969a]">
+                        <div class="donations-index__row-meta">
                             {{ new Date(donation.created_at).toLocaleDateString() }} · {{ donation.creator?.name ?? '—' }}
                         </div>
                     </div>
-                    <span class="hidden whitespace-nowrap rounded-lg bg-[#f0f4f2] px-[11px] py-[5px] text-xs font-medium text-[#6a787d] sm:inline-block">
+                    <span class="donations-index__row-type">
                         {{ donationTypeLabel(donation.donation_type) }}
                     </span>
                     <span
@@ -200,19 +200,19 @@ const donSubtitle = computed(() =>
                     >
                         {{ donationStatusLabel(donation.status) }}
                     </span>
-                    <span class="hidden text-lg text-[#c2ccc7] sm:inline">›</span>
+                    <span class="donations-index__row-arrow">›</span>
                 </Link>
             </div>
 
-            <div v-if="donations.data.length > 0" class="mt-4 flex flex-wrap gap-2">
+            <div v-if="donations.data.length > 0" class="donations-index__pagination">
                 <Link
                     v-for="link in donations.links"
                     :key="link.label"
                     :href="link.url ?? '#'"
-                    class="rounded-lg border border-[#dbe7e1] px-3 py-1 text-sm"
+                    class="donations-index__page-link"
                     :class="{
-                        'border-[#148f5b] bg-[#148f5b] text-white': link.active,
-                        'pointer-events-none text-[#c2ccc7]': !link.url,
+                        'donations-index__page-link--active': link.active,
+                        'donations-index__page-link--disabled': !link.url,
                     }"
                 >
                     <span v-html="paginationLabel(link.label)"></span>
@@ -221,3 +221,158 @@ const donSubtitle = computed(() =>
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.donations-index__header {
+    margin-bottom: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.donations-index__title {
+    margin-bottom: 2px;
+}
+
+.donations-index__subtitle {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #7a8b84;
+}
+
+.donations-index__cta-icon {
+    font-size: 17px;
+    line-height: 1;
+}
+
+.donations-index__chips {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.donations-index__filters {
+    margin-bottom: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 1rem;
+    padding: 1rem;
+}
+
+.donations-index__filter-field {
+    margin-bottom: 0;
+    width: auto;
+    flex: 1;
+    min-width: 160px;
+}
+
+.donations-index__filter-field--location {
+    min-width: 200px;
+}
+
+.donations-index__list {
+    overflow: hidden;
+    border-radius: 1rem;
+    border: 1px solid #e6ede9;
+    background-color: #fff;
+}
+
+.donations-index__empty {
+    padding: 44px;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #8a969a;
+}
+
+.donations-index__row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-bottom: 1px solid #f1f4f3;
+    padding: 15px 1rem;
+}
+
+.donations-index__row:last-child {
+    border-bottom: none;
+}
+
+.donations-index__row:hover {
+    background-color: #f8faf9;
+}
+
+.donations-index__row-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.donations-index__row-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 14.5px;
+    font-weight: 600;
+}
+
+.donations-index__row-meta {
+    font-size: 0.75rem;
+    color: #8a969a;
+}
+
+.donations-index__row-type {
+    display: none;
+    white-space: nowrap;
+    border-radius: 0.5rem;
+    background-color: #f0f4f2;
+    padding: 5px 11px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6a787d;
+}
+
+.donations-index__row-arrow {
+    display: none;
+    font-size: 1.125rem;
+    color: #c2ccc7;
+}
+
+.donations-index__pagination {
+    margin-top: 1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.donations-index__page-link {
+    border-radius: 0.5rem;
+    border: 1px solid #dbe7e1;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+}
+
+.donations-index__page-link--active {
+    border-color: #148f5b;
+    background-color: #148f5b;
+    color: #fff;
+}
+
+.donations-index__page-link--disabled {
+    pointer-events: none;
+    color: #c2ccc7;
+}
+
+@media (min-width: 768px) {
+    .donations-index__row {
+        padding-inline: 22px;
+    }
+
+    .donations-index__row-type,
+    .donations-index__row-arrow {
+        display: inline-block;
+    }
+}
+</style>

@@ -1,0 +1,47 @@
+@use '../abstracts/variables' as *;
+
+// .form-section — encabezado de una sección de formulario (título +
+// descripción), usado en los formularios de perfil.
+.form-section {
+    &__title {
+        font-size: 1.125rem;
+        font-weight: 500;
+        color: #111827;
+    }
+
+    &__description {
+        margin-top: $spacing-xs;
+        font-size: $font-size-sm;
+        color: #4b5563;
+    }
+
+    &__body {
+        margin-top: $spacing-lg;
+        display: flex;
+        flex-direction: column;
+        gap: $spacing-lg;
+    }
+}
+
+// .form-actions — fila de acciones al final de un formulario (botón +
+// mensaje de confirmación transitorio).
+.form-actions {
+    display: flex;
+    align-items: center;
+    gap: $spacing-md;
+
+    &__message {
+        font-size: $font-size-sm;
+        color: #4b5563;
+    }
+
+    &__message--enter-active,
+    &__message--leave-active {
+        transition: opacity 0.2s ease-in-out;
+    }
+
+    &__message--enter-from,
+    &__message--leave-to {
+        opacity: 0;
+    }
+}

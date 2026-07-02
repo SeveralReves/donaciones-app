@@ -21,7 +21,7 @@ const submit = () => {
     <GuestLayout>
         <Head title="Confirmar contraseña" />
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="auth-hint">
             Esta es un área segura de la aplicación. Por favor confirma tu
             contraseña antes de continuar.
         </div>
@@ -32,19 +32,17 @@ const submit = () => {
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
                     v-model="form.password"
                     required
                     autocomplete="current-password"
                     autofocus
                 />
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 flex justify-end">
+            <div class="auth-form__actions">
                 <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
+                    :class="{ 'is-busy': form.processing }"
                     :disabled="form.processing"
                 >
                     Confirmar
@@ -53,3 +51,17 @@ const submit = () => {
         </form>
     </GuestLayout>
 </template>
+
+<style scoped>
+.auth-hint {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.auth-form__actions {
+    margin-top: 1rem;
+    display: flex;
+    justify-content: flex-end;
+}
+</style>

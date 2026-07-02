@@ -1,0 +1,24 @@
+@use '../abstracts/variables' as *;
+@use '../abstracts/mixins' as *;
+
+// .panel — tarjeta blanca con sombra suave (estilo heredado de Breeze),
+// usada en pantallas de perfil y administración de usuarios. Distinta de
+// las tarjetas con borde (.donation-card, etc.) del resto de la app.
+.panel {
+    background-color: $color-background;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    padding: $spacing-lg;
+
+    @include respond(tablet) {
+        border-radius: 0.5rem;
+    }
+
+    // --roomy: padding responsivo (equivalente a "p-4 sm:p-8").
+    &--roomy {
+        padding: $spacing-md;
+
+        @include respond(tablet) {
+            padding: $spacing-xl;
+        }
+    }
+}

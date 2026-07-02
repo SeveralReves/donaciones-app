@@ -69,13 +69,11 @@ const formatDate = (value) => new Date(value).toLocaleDateString();
     <Head title="Panel" />
 
     <AuthenticatedLayout>
-        <div class="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
-            <h1 class="mb-1">Panel</h1>
-            <p class="mb-6 text-sm font-normal text-[#7a8b84]">
-                Resumen de la operación de hoy
-            </p>
+        <div class="page dashboard">
+            <h1 class="dashboard__title">Panel</h1>
+            <p class="dashboard__subtitle">Resumen de la operación de hoy</p>
 
-            <div class="stat-grid mb-4">
+            <div class="stat-grid dashboard__stats">
                 <div class="stat stat--highlight">
                     <span class="stat__value">{{ totalDonations }}</span>
                     <span class="stat__label">Donaciones totales</span>
@@ -94,43 +92,43 @@ const formatDate = (value) => new Date(value).toLocaleDateString();
                 </div>
             </div>
 
-            <div class="mb-4 grid gap-4 md:grid-cols-2">
-                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
-                    <div class="mb-[18px] text-[15px] font-semibold">Donaciones por estado</div>
-                    <div class="flex flex-col gap-[13px]">
+            <div class="dashboard__panels">
+                <div class="surface">
+                    <div class="surface__title">Donaciones por estado</div>
+                    <div class="dashboard__status-list">
                         <div
                             v-for="status in statuses"
                             :key="status"
-                            class="flex items-center gap-3"
+                            class="dashboard__status-row"
                         >
-                            <span class="w-[110px] shrink-0 text-[13px] font-medium text-[#5a686d]">
+                            <span class="dashboard__status-label">
                                 {{ donationStatusLabel(status) }}
                             </span>
-                            <div class="h-[9px] flex-1 rounded-full bg-[#eef2f1]">
+                            <div class="dashboard__status-track">
                                 <div
-                                    class="h-full rounded-full"
+                                    class="dashboard__status-fill"
                                     :style="{ width: statusBarWidth(status), backgroundColor: statusBarColors[status] }"
                                 ></div>
                             </div>
-                            <b class="w-4 shrink-0 text-right text-[13px] font-bold">
+                            <b class="dashboard__status-count">
                                 {{ statusCounts[status] ?? 0 }}
                             </b>
                         </div>
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
-                    <div class="mb-[18px] text-[15px] font-semibold">Donaciones por tipo</div>
-                    <div class="grid grid-cols-2 gap-[14px]">
+                <div class="surface">
+                    <div class="surface__title">Donaciones por tipo</div>
+                    <div class="dashboard__types">
                         <div
                             v-for="type in donationTypes"
                             :key="type"
-                            class="rounded-xl bg-[#eef7f0] px-4 py-[15px]"
+                            class="dashboard__type-tile"
                         >
-                            <div class="text-[26px] font-extrabold leading-none text-[#148f5b]">
+                            <div class="dashboard__type-value">
                                 {{ typeCounts[type] ?? 0 }}
                             </div>
-                            <div class="mt-[5px] text-xs font-medium text-[#6a787d]">
+                            <div class="dashboard__type-label">
                                 {{ donationTypeLabel(type) }}
                             </div>
                         </div>
@@ -138,18 +136,15 @@ const formatDate = (value) => new Date(value).toLocaleDateString();
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
-                <div class="mb-1 flex items-center justify-between">
-                    <div class="text-[15px] font-semibold">Donaciones recientes</div>
-                    <Link
-                        :href="route('donations.index')"
-                        class="text-[13px] font-semibold text-[#148f5b] hover:underline"
-                    >
+            <div class="surface">
+                <div class="dashboard__recent-header">
+                    <div class="surface__title dashboard__recent-title-bar">Donaciones recientes</div>
+                    <Link :href="route('donations.index')" class="dashboard__recent-link">
                         Ver todas
                     </Link>
                 </div>
 
-                <p v-if="recentDonations.length === 0" class="mt-4 text-sm text-[#7a8b84]">
+                <p v-if="recentDonations.length === 0" class="dashboard__recent-empty">
                     Todavía no hay donaciones registradas.
                 </p>
 
@@ -158,14 +153,14 @@ const formatDate = (value) => new Date(value).toLocaleDateString();
                         v-for="donation in recentDonations"
                         :key="donation.id"
                         :href="route('donations.show', donation.id)"
-                        class="flex items-center gap-[13px] border-b border-[#eef2f1] py-[13px] last:border-0"
+                        class="dashboard__recent-item"
                     >
                         <span class="avatar avatar--square">{{ initial(donation) }}</span>
-                        <div class="min-w-0 flex-1">
-                            <div class="truncate text-sm font-semibold">
+                        <div class="dashboard__recent-info">
+                            <div class="dashboard__recent-item-title">
                                 {{ donationTypeLabel(donation.donation_type) }} — {{ donation.location }}
                             </div>
-                            <div class="text-xs text-[#8a969a]">
+                            <div class="dashboard__recent-meta">
                                 {{ formatDate(donation.created_at) }} · {{ donation.creator?.name ?? '—' }}
                             </div>
                         </div>
@@ -180,3 +175,155 @@ const formatDate = (value) => new Date(value).toLocaleDateString();
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.dashboard__title {
+    margin-bottom: 0.25rem;
+}
+
+.dashboard__subtitle {
+    margin-bottom: 1.5rem;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #7a8b84;
+}
+
+.dashboard__stats {
+    margin-bottom: 1rem;
+}
+
+.dashboard__panels {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.dashboard__status-list {
+    display: flex;
+    flex-direction: column;
+    gap: 13px;
+}
+
+.dashboard__status-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.dashboard__status-label {
+    width: 110px;
+    flex-shrink: 0;
+    font-size: 13px;
+    font-weight: 500;
+    color: #5a686d;
+}
+
+.dashboard__status-track {
+    height: 9px;
+    flex: 1;
+    border-radius: 999px;
+    background-color: #eef2f1;
+}
+
+.dashboard__status-fill {
+    height: 100%;
+    border-radius: 999px;
+}
+
+.dashboard__status-count {
+    width: 1rem;
+    flex-shrink: 0;
+    text-align: right;
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.dashboard__types {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+}
+
+.dashboard__type-tile {
+    border-radius: 0.75rem;
+    background-color: #eef7f0;
+    padding: 15px 1rem;
+}
+
+.dashboard__type-value {
+    font-size: 26px;
+    font-weight: 800;
+    line-height: 1;
+    color: #148f5b;
+}
+
+.dashboard__type-label {
+    margin-top: 5px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: #6a787d;
+}
+
+.dashboard__recent-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.25rem;
+}
+
+.dashboard__recent-title-bar {
+    margin-bottom: 0;
+}
+
+.dashboard__recent-link {
+    font-size: 13px;
+    font-weight: 600;
+    color: #148f5b;
+}
+
+.dashboard__recent-link:hover {
+    text-decoration: underline;
+}
+
+.dashboard__recent-empty {
+    margin-top: 1rem;
+    font-size: 0.875rem;
+    color: #7a8b84;
+}
+
+.dashboard__recent-item {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    border-bottom: 1px solid #eef2f1;
+    padding-block: 13px;
+}
+
+.dashboard__recent-item:last-child {
+    border-bottom: none;
+}
+
+.dashboard__recent-info {
+    min-width: 0;
+    flex: 1;
+}
+
+.dashboard__recent-item-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.dashboard__recent-meta {
+    font-size: 0.75rem;
+    color: #8a969a;
+}
+
+@media (min-width: 768px) {
+    .dashboard__panels {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+</style>

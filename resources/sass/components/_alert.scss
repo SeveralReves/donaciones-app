@@ -1,0 +1,18 @@
+@use '../abstracts/variables' as *;
+
+// .alert — mensajes de estado cortos (confirmaciones, avisos).
+.alert {
+    font-size: $font-size-sm;
+
+    &--success {
+        font-weight: 500;
+        color: #16a34a;
+    }
+
+    &--warning {
+        border-radius: $border-radius;
+        background-color: #fefce8;
+        padding: $spacing-md;
+        color: #854d0e;
+    }
+}

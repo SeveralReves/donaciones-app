@@ -1,0 +1,16 @@
+@use '../abstracts/variables' as *;
+
+// .surface — tarjeta blanca con borde, contenedor genérico reutilizado en
+// paneles del dashboard, barras de filtro, listados, etc.
+.surface {
+    border-radius: $border-radius-lg;
+    border: $border-width solid $color-border;
+    background-color: $color-background;
+    padding: $spacing-lg;
+
+    &__title {
+        margin-bottom: 18px;
+        font-size: 15px;
+        font-weight: 600;
+    }
+}

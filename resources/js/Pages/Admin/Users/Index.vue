@@ -26,23 +26,20 @@ const filteredUsers = computed(() => {
 });
 
 const initial = (name) => name.trim().charAt(0).toUpperCase();
-
-const roleBadgeClass = (rol) =>
-    rol === 'admin' ? 'bg-[#f0f4f2] text-[#6a787d]' : 'bg-[#e7f3ec] text-[#148f5b]';
 </script>
 
 <template>
     <Head title="Usuarios" />
 
     <AuthenticatedLayout>
-        <div class="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
-            <div class="mb-[18px] flex flex-wrap items-center justify-between gap-3.5">
+        <div class="page users-index">
+            <div class="users-index__header">
                 <div>
-                    <h1 class="mb-0.5">Usuarios</h1>
-                    <p class="text-sm font-normal text-[#7a8b84]">Administradores y personal médico</p>
+                    <h1 class="users-index__title">Usuarios</h1>
+                    <p class="users-index__subtitle">Administradores y personal médico</p>
                 </div>
                 <Link :href="route('admin.users.create')" class="btn btn--primary">
-                    <span class="text-[17px] leading-none">+</span> Nuevo usuario
+                    <span class="users-index__cta-icon">+</span> Nuevo usuario
                 </Link>
             </div>
 
@@ -50,55 +47,48 @@ const roleBadgeClass = (rol) =>
                 v-model="search"
                 type="text"
                 placeholder="Buscar por nombre o correo…"
-                class="form-field__input mb-4 max-w-[360px]"
+                class="form-field__input users-index__search"
             />
 
-            <div class="overflow-x-auto rounded-2xl border border-[#e6ede9] bg-white">
-                <table class="w-full text-left text-sm">
-                    <thead class="border-b border-[#eef2f1] bg-[#f6f9f8]">
-                        <tr class="text-xs font-semibold uppercase tracking-wide text-[#6a787d]">
-                            <th class="px-5 py-3.5 sm:px-[22px]">Nombre</th>
-                            <th class="hidden px-3 py-3.5 md:table-cell">Correo</th>
-                            <th class="px-3 py-3.5">Rol</th>
-                            <th class="hidden px-3 py-3.5 md:table-cell">Cód. médico</th>
-                            <th class="hidden px-3 py-3.5 md:table-cell">Servicio</th>
-                            <th class="px-5 py-3.5 sm:px-[22px]"></th>
+            <div class="users-index__table-wrap">
+                <table class="users-index__table">
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th class="users-index__col--md">Correo</th>
+                            <th>Rol</th>
+                            <th class="users-index__col--md">Cód. médico</th>
+                            <th class="users-index__col--md">Servicio</th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr
-                            v-for="user in filteredUsers"
-                            :key="user.id"
-                            class="border-b border-[#f1f4f3] last:border-0"
-                        >
-                            <td class="px-5 py-3.5 sm:px-[22px]">
-                                <div class="flex min-w-0 items-center gap-[11px]">
+                        <tr v-for="user in filteredUsers" :key="user.id">
+                            <td>
+                                <div class="users-index__name">
                                     <span class="avatar">{{ initial(user.name) }}</span>
-                                    <span class="truncate font-semibold">{{ user.name }}</span>
+                                    <span class="users-index__name-text">{{ user.name }}</span>
                                 </div>
                             </td>
-                            <td class="hidden truncate px-3 py-3.5 text-[#6a787d] md:table-cell">
+                            <td class="users-index__col--md users-index__email">
                                 {{ user.email }}
                             </td>
-                            <td class="px-3 py-3.5">
+                            <td>
                                 <span
-                                    class="inline-block whitespace-nowrap rounded-lg px-[11px] py-[5px] text-xs font-semibold"
-                                    :class="roleBadgeClass(user.rol)"
+                                    class="users-index__role"
+                                    :class="user.rol === 'admin' ? 'users-index__role--admin' : 'users-index__role--medical'"
                                 >
                                     {{ userRoleLabel(user.rol) }}
                                 </span>
                             </td>
-                            <td class="hidden px-3 py-3.5 text-[#6a787d] md:table-cell">
+                            <td class="users-index__col--md">
                                 {{ user.codigo_medico ?? '—' }}
                             </td>
-                            <td class="hidden px-3 py-3.5 text-[#6a787d] md:table-cell">
+                            <td class="users-index__col--md">
                                 {{ user.servicio ?? '—' }}
                             </td>
-                            <td class="px-5 py-3.5 text-right sm:px-[22px]">
-                                <Link
-                                    :href="route('admin.users.edit', user.id)"
-                                    class="font-semibold text-[#148f5b] hover:underline"
-                                >
+                            <td class="users-index__actions">
+                                <Link :href="route('admin.users.edit', user.id)" class="users-index__edit">
                                     Editar
                                 </Link>
                             </td>
@@ -106,10 +96,162 @@ const roleBadgeClass = (rol) =>
                     </tbody>
                 </table>
 
-                <p v-if="filteredUsers.length === 0" class="p-11 text-center text-sm font-medium text-[#8a969a]">
+                <p v-if="filteredUsers.length === 0" class="users-index__empty">
                     No hay usuarios que coincidan con la búsqueda.
                 </p>
             </div>
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.users-index__header {
+    margin-bottom: 18px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.users-index__title {
+    margin-bottom: 2px;
+}
+
+.users-index__subtitle {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #7a8b84;
+}
+
+.users-index__cta-icon {
+    font-size: 17px;
+    line-height: 1;
+}
+
+.users-index__search {
+    margin-bottom: 1rem;
+    max-width: 360px;
+}
+
+.users-index__table-wrap {
+    overflow-x: auto;
+    border-radius: 1rem;
+    border: 1px solid #e6ede9;
+    background-color: #fff;
+}
+
+.users-index__table {
+    width: 100%;
+    text-align: left;
+    font-size: 0.875rem;
+    border-collapse: collapse;
+}
+
+.users-index__table thead {
+    border-bottom: 1px solid #eef2f1;
+    background-color: #f6f9f8;
+}
+
+.users-index__table thead tr {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #6a787d;
+}
+
+.users-index__table th,
+.users-index__table td {
+    padding: 14px 12px;
+}
+
+.users-index__table th:first-child,
+.users-index__table td:first-child {
+    padding-inline: 1.25rem;
+}
+
+.users-index__table th:last-child,
+.users-index__table td:last-child {
+    padding-inline: 1.25rem;
+}
+
+.users-index__table tbody tr {
+    border-bottom: 1px solid #f1f4f3;
+}
+
+.users-index__table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.users-index__col--md {
+    display: none;
+}
+
+.users-index__name {
+    display: flex;
+    min-width: 0;
+    align-items: center;
+    gap: 11px;
+}
+
+.users-index__name-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-weight: 600;
+}
+
+.users-index__email {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #6a787d;
+}
+
+.users-index__role {
+    display: inline-block;
+    white-space: nowrap;
+    border-radius: 0.5rem;
+    padding: 5px 11px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.users-index__role--admin {
+    background-color: #f0f4f2;
+    color: #6a787d;
+}
+
+.users-index__role--medical {
+    background-color: #e7f3ec;
+    color: #148f5b;
+}
+
+.users-index__actions {
+    text-align: right;
+}
+
+.users-index__edit {
+    font-weight: 600;
+    color: #148f5b;
+}
+
+.users-index__edit:hover {
+    text-decoration: underline;
+}
+
+.users-index__empty {
+    padding: 44px;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #8a969a;
+}
+
+@media (min-width: 768px) {
+    .users-index__col--md {
+        display: table-cell;
+    }
+}
+</style>

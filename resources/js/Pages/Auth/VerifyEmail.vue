@@ -25,37 +25,44 @@ const verificationLinkSent = computed(
     <GuestLayout>
         <Head title="Verificación de correo" />
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="auth-hint">
             ¡Gracias por registrarte! Antes de empezar, ¿puedes verificar tu
             correo electrónico haciendo clic en el enlace que te acabamos de
             enviar? Si no recibiste el correo, con gusto te enviamos otro.
         </div>
 
-        <div
-            class="mb-4 text-sm font-medium text-green-600"
-            v-if="verificationLinkSent"
-        >
+        <div v-if="verificationLinkSent" class="alert alert--success auth-hint">
             Se ha enviado un nuevo enlace de verificación al correo
             electrónico que registraste.
         </div>
 
         <form @submit.prevent="submit">
-            <div class="mt-4 flex items-center justify-between">
+            <div class="verify-email__actions">
                 <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
+                    :class="{ 'is-busy': form.processing }"
                     :disabled="form.processing"
                 >
                     Reenviar correo de verificación
                 </PrimaryButton>
 
-                <Link
-                    :href="route('logout')"
-                    method="post"
-                    as="button"
-                    class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >Cerrar sesión</Link
-                >
+                <Link :href="route('logout')" method="post" as="button" class="link--muted">
+                    Cerrar sesión
+                </Link>
             </div>
         </form>
     </GuestLayout>
 </template>
+
+<style scoped>
+.auth-hint {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.verify-email__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+</style>

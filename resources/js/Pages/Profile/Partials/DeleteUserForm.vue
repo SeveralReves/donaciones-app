@@ -39,13 +39,11 @@ const closeModal = () => {
 </script>
 
 <template>
-    <section class="space-y-6">
+    <section class="delete-account">
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Eliminar cuenta
-            </h2>
+            <h2 class="form-section__title">Eliminar cuenta</h2>
 
-            <p class="mt-1 text-sm text-gray-600">
+            <p class="form-section__description">
                 Una vez eliminada tu cuenta, todos sus recursos y datos se
                 borrarán permanentemente. Antes de eliminar tu cuenta,
                 descarga cualquier dato o información que quieras conservar.
@@ -55,48 +53,41 @@ const closeModal = () => {
         <DangerButton @click="confirmUserDeletion">Eliminar cuenta</DangerButton>
 
         <Modal :show="confirmingUserDeletion" @close="closeModal">
-            <div class="p-6">
-                <h2
-                    class="text-lg font-medium text-gray-900"
-                >
+            <div class="modal__content">
+                <h2 class="form-section__title">
                     ¿Estás seguro de que quieres eliminar tu cuenta?
                 </h2>
 
-                <p class="mt-1 text-sm text-gray-600">
+                <p class="form-section__description">
                     Una vez eliminada tu cuenta, todos sus recursos y datos se
                     borrarán permanentemente. Ingresa tu contraseña para
                     confirmar que quieres eliminar tu cuenta de forma
                     permanente.
                 </p>
 
-                <div class="mt-6">
-                    <InputLabel
-                        for="password"
-                        value="Contraseña"
-                        class="sr-only"
-                    />
+                <div class="delete-account__field">
+                    <InputLabel for="password" value="Contraseña" class="sr-only" />
 
                     <TextInput
                         id="password"
                         ref="passwordInput"
                         v-model="form.password"
                         type="password"
-                        class="mt-1 block w-3/4"
+                        class="field__input--three-quarters"
                         placeholder="Contraseña"
                         @keyup.enter="deleteUser"
                     />
 
-                    <InputError :message="form.errors.password" class="mt-2" />
+                    <InputError :message="form.errors.password" />
                 </div>
 
-                <div class="mt-6 flex justify-end">
+                <div class="delete-account__actions">
                     <SecondaryButton @click="closeModal">
                         Cancelar
                     </SecondaryButton>
 
                     <DangerButton
-                        class="ms-3"
-                        :class="{ 'opacity-25': form.processing }"
+                        :class="{ 'is-busy': form.processing }"
                         :disabled="form.processing"
                         @click="deleteUser"
                     >
@@ -107,3 +98,22 @@ const closeModal = () => {
         </Modal>
     </section>
 </template>
+
+<style scoped>
+.delete-account {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.delete-account__field {
+    margin-top: 1.5rem;
+}
+
+.delete-account__actions {
+    margin-top: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+}
+</style>

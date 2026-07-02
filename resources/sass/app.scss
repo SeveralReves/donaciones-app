@@ -11,6 +11,7 @@
 // abstracts/variables y abstracts/mixins.
 @use 'base/reset';
 @use 'base/typography';
+@use 'base/helpers';
 
 // Layout: estructuras de página (grid, contenedores, header/footer).
 @use 'layout/container';
@@ -18,8 +19,18 @@
 // Components: bloques BEM reutilizables.
 @use 'components/button';
 @use 'components/form';
+@use 'components/field';
 @use 'components/card';
 @use 'components/timeline';
 @use 'components/stat';
 @use 'components/chip';
 @use 'components/avatar';
+@use 'components/guest';
+@use 'components/dropdown';
+@use 'components/modal';
+@use 'components/alert';
+@use 'components/link';
+@use 'components/panel';
+@use 'components/form-section';
+@use 'components/app-header';
+@use 'components/surface';

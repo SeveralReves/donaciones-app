@@ -87,21 +87,18 @@ const receiverWhatsAppUrl = computed(() =>
     <Head title="Detalle de donación" />
 
     <AuthenticatedLayout>
-        <div class="mx-auto max-w-[1180px] px-4 py-6 sm:px-6">
-            <Link
-                :href="route('donations.index')"
-                class="mb-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#148f5b] hover:underline"
-            >
-                <span class="text-base leading-none">←</span> Volver a donaciones
+        <div class="page donation-detail">
+            <Link :href="route('donations.index')" class="donation-detail__back">
+                <span class="donation-detail__back-icon">←</span> Volver a donaciones
             </Link>
 
-            <h1 class="mb-6">
+            <h1 class="donation-detail__title">
                 {{ donationTypeLabel(donation.donation_type) }} — {{ donation.location }}
             </h1>
 
-            <div class="space-y-4">
-                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
-                    <h3 class="text-sm font-semibold text-[#5a686d]">
+            <div class="donation-detail__sections">
+                <div class="surface">
+                    <h3 class="donation-detail__heading">
                         Estado actual:
                         <span
                             :class="`donation-card__status donation-card__status--${donation.status}`"
@@ -110,69 +107,65 @@ const receiverWhatsAppUrl = computed(() =>
                         </span>
                     </h3>
 
-                    <dl class="mt-4 grid grid-cols-2 gap-4 text-sm">
+                    <dl class="donation-detail__fields">
                         <div>
-                            <dt class="text-[#8a969a]">Paciente</dt>
+                            <dt class="donation-detail__field-label">Paciente</dt>
                             <dd>{{ donation.patient_name ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[#8a969a]">Ubicación</dt>
+                            <dt class="donation-detail__field-label">Ubicación</dt>
                             <dd>{{ donation.location }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[#8a969a]">Contacto</dt>
+                            <dt class="donation-detail__field-label">Contacto</dt>
                             <dd>{{ donation.contact_number ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[#8a969a]">Cédula</dt>
+                            <dt class="donation-detail__field-label">Cédula</dt>
                             <dd>{{ donation.cedula ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[#8a969a]">Médico / responsable receptor</dt>
+                            <dt class="donation-detail__field-label">Médico / responsable receptor</dt>
                             <dd>{{ donation.receiving_doctor_name ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[#8a969a]">Código médico</dt>
+                            <dt class="donation-detail__field-label">Código médico</dt>
                             <dd>{{ donation.receiving_doctor_code ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[#8a969a]">Servicio</dt>
+                            <dt class="donation-detail__field-label">Servicio</dt>
                             <dd>{{ donation.receiving_service ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[#8a969a]">Tipo de vehículo</dt>
+                            <dt class="donation-detail__field-label">Tipo de vehículo</dt>
                             <dd>{{ donation.vehicle_type ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[#8a969a]">Nombre de quien entrega</dt>
+                            <dt class="donation-detail__field-label">Nombre de quien entrega</dt>
                             <dd>{{ donation.delivery_name ?? '—' }}</dd>
                         </div>
                         <div>
-                            <dt class="text-[#8a969a]">Contacto de quien entrega</dt>
+                            <dt class="donation-detail__field-label">Contacto de quien entrega</dt>
                             <dd>{{ donation.delivery_contact ?? '—' }}</dd>
                         </div>
                     </dl>
                 </div>
 
-                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
-                    <h3 class="text-sm font-semibold text-[#5a686d]">Artículos</h3>
-                    <table class="mt-4 w-full text-left text-sm">
-                        <thead class="border-b border-[#eef2f1] bg-[#f6f9f8]">
+                <div class="surface">
+                    <h3 class="donation-detail__heading">Artículos</h3>
+                    <table class="donation-detail__table">
+                        <thead>
                             <tr>
-                                <th class="px-4 py-2">Nombre</th>
-                                <th class="px-4 py-2">Cantidad</th>
-                                <th class="px-4 py-2">Unidad</th>
+                                <th>Nombre</th>
+                                <th>Cantidad</th>
+                                <th>Unidad</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr
-                                v-for="item in donation.items"
-                                :key="item.id"
-                                class="border-b border-[#f1f4f3] last:border-0"
-                            >
-                                <td class="px-4 py-2">{{ item.name }}</td>
-                                <td class="px-4 py-2">{{ item.quantity }}</td>
-                                <td class="px-4 py-2">{{ item.unit ?? '—' }}</td>
+                            <tr v-for="item in donation.items" :key="item.id">
+                                <td>{{ item.name }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.unit ?? '—' }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -180,13 +173,11 @@ const receiverWhatsAppUrl = computed(() =>
 
                 <div
                     v-if="(deliveryAssigned && donation.delivery_contact) || donation.contact_number"
-                    class="rounded-2xl border border-[#e6ede9] bg-white p-6"
+                    class="surface"
                 >
-                    <h3 class="text-sm font-semibold text-[#5a686d]">
-                        Enviar por WhatsApp
-                    </h3>
+                    <h3 class="donation-detail__heading">Enviar por WhatsApp</h3>
 
-                    <div class="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+                    <div class="donation-detail__whatsapp">
                         <div v-if="deliveryAssigned && donation.delivery_contact">
                             <a
                                 v-if="deliveryWhatsAppUrl"
@@ -229,8 +220,8 @@ const receiverWhatsAppUrl = computed(() =>
                     </div>
                 </div>
 
-                <div v-if="nextStatus" class="rounded-2xl border border-[#e6ede9] bg-white p-6">
-                    <h3 class="text-sm font-semibold text-[#5a686d]">
+                <div v-if="nextStatus" class="surface">
+                    <h3 class="donation-detail__heading">
                         Avanzar a "{{ donationStatusLabel(nextStatus) }}"
                     </h3>
 
@@ -238,7 +229,7 @@ const receiverWhatsAppUrl = computed(() =>
                         <div
                             v-for="field in missingFields"
                             :key="field"
-                            class="form-field mt-4"
+                            class="form-field donation-detail__form-field"
                         >
                             <label :for="field" class="form-field__label">
                                 {{ fieldLabels[field] ?? field }}
@@ -258,7 +249,7 @@ const receiverWhatsAppUrl = computed(() =>
                         <div
                             v-for="field in optionalFields"
                             :key="field"
-                            class="form-field mt-4"
+                            class="form-field donation-detail__form-field"
                         >
                             <label :for="field" class="form-field__label">
                                 {{ fieldLabels[field] ?? field }}
@@ -278,12 +269,12 @@ const receiverWhatsAppUrl = computed(() =>
                             {{ statusForm.errors.status }}
                         </p>
 
-                        <div class="mt-6">
+                        <div class="donation-detail__advance">
                             <button
                                 type="submit"
                                 class="btn btn--primary btn--full"
                                 :disabled="!canAdvance || statusForm.processing"
-                                :class="{ 'opacity-25': !canAdvance || statusForm.processing }"
+                                :class="{ 'is-busy': !canAdvance || statusForm.processing }"
                             >
                                 Avanzar a {{ donationStatusLabel(nextStatus) }}
                             </button>
@@ -291,17 +282,15 @@ const receiverWhatsAppUrl = computed(() =>
                     </form>
                 </div>
 
-                <div class="rounded-2xl border border-[#e6ede9] bg-white p-6">
-                    <h3 class="text-sm font-semibold text-[#5a686d]">
-                        Historial de estados
-                    </h3>
+                <div class="surface">
+                    <h3 class="donation-detail__heading">Historial de estados</h3>
 
-                    <ol class="status-timeline mt-4">
+                    <ol class="status-timeline donation-detail__timeline">
                         <li v-for="log in statusLogs" :key="log.id" class="status-timeline__item">
                             <div class="status-timeline__date">{{ formatDate(log.changed_at) }}</div>
                             <div class="status-timeline__transition">
                                 <span v-if="log.from_status">{{ donationStatusLabel(log.from_status) }}</span>
-                                <span v-else class="italic">inicio</span>
+                                <span v-else class="donation-detail__timeline-start">inicio</span>
                                 →
                                 <span>{{ donationStatusLabel(log.to_status) }}</span>
                             </div>
@@ -315,3 +304,108 @@ const receiverWhatsAppUrl = computed(() =>
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.donation-detail__back {
+    margin-bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #148f5b;
+}
+
+.donation-detail__back:hover {
+    text-decoration: underline;
+}
+
+.donation-detail__back-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.donation-detail__title {
+    margin-bottom: 1.5rem;
+}
+
+.donation-detail__sections {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.donation-detail__heading {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #5a686d;
+}
+
+.donation-detail__fields {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    font-size: 0.875rem;
+}
+
+.donation-detail__field-label {
+    color: #8a969a;
+}
+
+.donation-detail__table {
+    margin-top: 1rem;
+    width: 100%;
+    text-align: left;
+    font-size: 0.875rem;
+    border-collapse: collapse;
+}
+
+.donation-detail__table thead {
+    border-bottom: 1px solid #eef2f1;
+    background-color: #f6f9f8;
+}
+
+.donation-detail__table th,
+.donation-detail__table td {
+    padding: 0.5rem 1rem;
+}
+
+.donation-detail__table tbody tr {
+    border-bottom: 1px solid #f1f4f3;
+}
+
+.donation-detail__table tbody tr:last-child {
+    border-bottom: none;
+}
+
+.donation-detail__whatsapp {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.donation-detail__form-field {
+    margin-top: 1rem;
+}
+
+.donation-detail__advance {
+    margin-top: 1.5rem;
+}
+
+.donation-detail__timeline {
+    margin-top: 1rem;
+}
+
+.donation-detail__timeline-start {
+    font-style: italic;
+}
+
+@media (min-width: 768px) {
+    .donation-detail__whatsapp {
+        flex-direction: row;
+        flex-wrap: wrap;
+    }
+}
+</style>

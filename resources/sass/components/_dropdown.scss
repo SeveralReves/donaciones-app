@@ -1,0 +1,86 @@
+@use '../abstracts/variables' as *;
+
+// .dropdown — menú desplegable (usado hoy para el menú de usuario). El
+// panel se anima con clases pasadas al componente <Transition> de Vue.
+.dropdown {
+    position: relative;
+
+    &__overlay {
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+    }
+
+    &__panel {
+        position: absolute;
+        z-index: 50;
+        margin-top: 0.5rem;
+        width: 12rem;
+        border-radius: 0.375rem;
+        box-shadow:
+            0 10px 15px -3px rgba(0, 0, 0, 0.1),
+            0 4px 6px -4px rgba(0, 0, 0, 0.1);
+
+        &--right {
+            right: 0;
+            transform-origin: top right;
+        }
+
+        &--left {
+            left: 0;
+            transform-origin: top left;
+        }
+
+        &--enter-active {
+            transition:
+                opacity 0.2s ease,
+                transform 0.2s ease;
+        }
+
+        &--leave-active {
+            transition:
+                opacity 0.075s ease,
+                transform 0.075s ease;
+        }
+
+        &--enter-from,
+        &--leave-to {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+
+        &--enter-to,
+        &--leave-from {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    &__content {
+        border-radius: 0.375rem;
+        background-color: #fff;
+        padding-block: 0.25rem;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.05);
+    }
+
+    &__link {
+        display: block;
+        width: 100%;
+        padding: 0.5rem 1rem;
+        text-align: start;
+        font-family: inherit;
+        font-size: $font-size-sm;
+        line-height: 1.25rem;
+        color: #374151;
+        background: none;
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.15s ease;
+
+        &:hover,
+        &:focus {
+            background-color: #f3f4f6;
+            outline: none;
+        }
+    }
+}

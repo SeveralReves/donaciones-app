@@ -35,39 +35,37 @@ const submit = () => {
     <GuestLayout>
         <Head title="Restablecer contraseña" />
 
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" class="stack">
             <div>
                 <InputLabel for="email" value="Correo electrónico" />
 
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
                     v-model="form.email"
                     required
                     autofocus
                     autocomplete="username"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError :message="form.errors.email" />
             </div>
 
-            <div class="mt-4">
+            <div>
                 <InputLabel for="password" value="Contraseña" />
 
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
                     v-model="form.password"
                     required
                     autocomplete="new-password"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError :message="form.errors.password" />
             </div>
 
-            <div class="mt-4">
+            <div>
                 <InputLabel
                     for="password_confirmation"
                     value="Confirmar contraseña"
@@ -76,21 +74,17 @@ const submit = () => {
                 <TextInput
                     id="password_confirmation"
                     type="password"
-                    class="mt-1 block w-full"
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"
                 />
 
-                <InputError
-                    class="mt-2"
-                    :message="form.errors.password_confirmation"
-                />
+                <InputError :message="form.errors.password_confirmation" />
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="auth-form__actions">
                 <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
+                    :class="{ 'is-busy': form.processing }"
                     :disabled="form.processing"
                 >
                     Restablecer contraseña
@@ -99,3 +93,11 @@ const submit = () => {
         </form>
     </GuestLayout>
 </template>
+
+<style scoped>
+.auth-form__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+</style>

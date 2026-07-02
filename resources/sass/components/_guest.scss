@@ -1,0 +1,40 @@
+@use '../abstracts/mixins' as *;
+
+// .guest — layout centrado para pantallas sin sesión (login, recuperar
+// contraseña, etc.).
+.guest {
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+    align-items: center;
+    background-color: #f3f4f6;
+    padding-top: 1.5rem;
+
+    @include respond(tablet) {
+        justify-content: center;
+        padding-top: 0;
+    }
+
+    &__logo {
+        width: 5rem;
+        height: 5rem;
+        fill: currentColor;
+        color: #6b7280;
+    }
+
+    &__panel {
+        margin-top: 1.5rem;
+        width: 100%;
+        overflow: hidden;
+        background-color: #fff;
+        padding: 1rem 1.5rem;
+        box-shadow:
+            0 4px 6px -1px rgba(0, 0, 0, 0.1),
+            0 2px 4px -2px rgba(0, 0, 0, 0.1);
+
+        @include respond(tablet) {
+            max-width: 28rem;
+            border-radius: 0.5rem;
+        }
+    }
+}

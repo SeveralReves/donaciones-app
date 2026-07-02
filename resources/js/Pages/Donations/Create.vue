@@ -47,23 +47,18 @@ const submit = () => {
     <Head title="Nueva donación" />
 
     <AuthenticatedLayout>
-        <div class="mx-auto max-w-[720px] px-4 py-6 sm:px-6">
-            <Link
-                :href="route('donations.index')"
-                class="mb-3 inline-flex items-center gap-1.5 text-sm font-semibold text-[#148f5b] hover:underline"
-            >
-                <span class="text-base leading-none">←</span> Volver a donaciones
+        <div class="page page--narrow donation-form">
+            <Link :href="route('donations.index')" class="donation-form__back">
+                <span class="donation-form__back-icon">←</span> Volver a donaciones
             </Link>
 
-            <h1 class="mb-1">Nueva donación</h1>
-            <p class="mb-[22px] text-sm font-normal text-[#7a8b84]">
-                Registra qué se dona y a dónde va
-            </p>
+            <h1 class="donation-form__title">Nueva donación</h1>
+            <p class="donation-form__subtitle">Registra qué se dona y a dónde va</p>
 
-            <div class="rounded-[18px] border border-[#e6ede9] bg-white px-6 py-7">
+            <div class="surface donation-form__panel">
                 <form @submit.prevent="submit">
-                    <div class="mb-[11px] text-sm font-semibold">¿Qué tipo de donación es?</div>
-                    <div class="mb-6 flex flex-wrap gap-[9px]">
+                    <div class="donation-form__label">¿Qué tipo de donación es?</div>
+                    <div class="donation-form__chips">
                         <button
                             v-for="type in donationTypes"
                             :key="type.value"
@@ -75,11 +70,11 @@ const submit = () => {
                             {{ type.label }}
                         </button>
                     </div>
-                    <p v-if="form.errors.donation_type" class="form-field__error -mt-4 mb-4">
+                    <p v-if="form.errors.donation_type" class="form-field__error donation-form__chips-error">
                         {{ form.errors.donation_type }}
                     </p>
 
-                    <div class="grid gap-4 sm:grid-cols-2">
+                    <div class="donation-form__grid">
                         <div class="form-field">
                             <label for="location" class="form-field__label">Ubicación</label>
                             <input
@@ -111,22 +106,16 @@ const submit = () => {
                     </div>
 
                     <div
-                        class="mt-[18px] rounded-2xl border px-[18px] pb-1.5 pt-[18px]"
-                        :class="requiresDoctor ? 'border-[#f7d7d2] bg-[#fef4f2]' : 'border-[#e6ede9] bg-[#f8faf9]'"
+                        class="donation-form__medical"
+                        :class="{ 'donation-form__medical--required': requiresDoctor }"
                     >
-                        <div
-                            class="mb-3.5 flex items-center gap-2 text-[13px] font-semibold"
-                            :class="requiresDoctor ? 'text-[#c0392b]' : 'text-[#5a686d]'"
-                        >
-                            <span
-                                v-if="requiresDoctor"
-                                class="flex h-5 w-5 items-center justify-center rounded-full bg-[#c0392b] text-xs text-white"
-                            >!</span>
+                        <div class="donation-form__medical-header">
+                            <span v-if="requiresDoctor" class="donation-form__medical-icon">!</span>
                             Médico / responsable que recibe
                             <span v-if="requiresDoctor">· obligatorio para insumos médicos</span>
                         </div>
-                        <div class="mb-3.5 grid gap-3.5 sm:grid-cols-2">
-                            <div class="form-field !mb-0">
+                        <div class="donation-form__grid donation-form__grid--tight">
+                            <div class="form-field donation-form__field">
                                 <label for="receiving_doctor_name" class="form-field__label">Nombre</label>
                                 <input
                                     id="receiving_doctor_name"
@@ -140,7 +129,7 @@ const submit = () => {
                                 </p>
                             </div>
 
-                            <div v-if="requiresDoctor" class="form-field !mb-0">
+                            <div v-if="requiresDoctor" class="form-field donation-form__field">
                                 <label for="receiving_doctor_code" class="form-field__label">Código médico</label>
                                 <input
                                     id="receiving_doctor_code"
@@ -172,11 +161,11 @@ const submit = () => {
                         </div>
                     </div>
 
-                    <div class="my-5 h-px bg-[#eef2f1]"></div>
+                    <div class="donation-form__divider"></div>
 
-                    <div class="mb-3.5 text-sm font-semibold">Contacto</div>
-                    <div class="mb-5 grid gap-4 sm:grid-cols-2">
-                        <div class="form-field !mb-0">
+                    <div class="donation-form__label">Contacto</div>
+                    <div class="donation-form__grid donation-form__grid--contact">
+                        <div class="form-field donation-form__field">
                             <label for="contact_number" class="form-field__label">Número de contacto</label>
                             <input
                                 id="contact_number"
@@ -190,7 +179,7 @@ const submit = () => {
                             </p>
                         </div>
 
-                        <div class="form-field !mb-0">
+                        <div class="form-field donation-form__field">
                             <label for="cedula" class="form-field__label">Cédula</label>
                             <input
                                 id="cedula"
@@ -205,25 +194,25 @@ const submit = () => {
                         </div>
                     </div>
 
-                    <div class="my-5 h-px bg-[#eef2f1]"></div>
+                    <div class="donation-form__divider"></div>
 
-                    <div class="mb-3 flex items-center justify-between">
-                        <div class="text-sm font-semibold">Artículos donados</div>
+                    <div class="donation-form__items-header">
+                        <div class="donation-form__label donation-form__label--flush">Artículos donados</div>
                         <button type="button" class="btn btn--secondary" @click="addItem">
-                            <span class="text-[15px] leading-none">+</span> Agregar artículo
+                            <span class="donation-form__item-icon">+</span> Agregar artículo
                         </button>
                     </div>
-                    <p v-if="form.errors.items" class="form-field__error mb-3">
+                    <p v-if="form.errors.items" class="form-field__error donation-form__items-error">
                         {{ form.errors.items }}
                     </p>
 
-                    <div class="flex flex-col gap-2.5">
+                    <div class="donation-form__items">
                         <div
                             v-for="(item, index) in form.items"
                             :key="index"
-                            class="grid grid-cols-2 items-end gap-2.5 rounded-xl border border-[#e6ede9] bg-[#f8faf9] p-[13px] sm:grid-cols-12"
+                            class="donation-form__item-row"
                         >
-                            <div class="form-field !mb-0 col-span-2 sm:col-span-5">
+                            <div class="form-field donation-form__field donation-form__item-name">
                                 <label :for="`item-name-${index}`" class="form-field__label">Nombre</label>
                                 <input
                                     :id="`item-name-${index}`"
@@ -238,7 +227,7 @@ const submit = () => {
                                 </p>
                             </div>
 
-                            <div class="form-field !mb-0 col-span-1 sm:col-span-3">
+                            <div class="form-field donation-form__field donation-form__item-quantity">
                                 <label :for="`item-quantity-${index}`" class="form-field__label">Cantidad</label>
                                 <input
                                     :id="`item-quantity-${index}`"
@@ -254,7 +243,7 @@ const submit = () => {
                                 </p>
                             </div>
 
-                            <div class="form-field !mb-0 col-span-1 sm:col-span-3">
+                            <div class="form-field donation-form__field donation-form__item-unit">
                                 <label :for="`item-unit-${index}`" class="form-field__label">Unidad</label>
                                 <select
                                     :id="`item-unit-${index}`"
@@ -275,7 +264,7 @@ const submit = () => {
                                 </p>
                             </div>
 
-                            <div class="col-span-2 flex items-end justify-end sm:col-span-1">
+                            <div class="donation-form__item-remove">
                                 <button
                                     type="button"
                                     class="btn btn--danger"
@@ -288,11 +277,11 @@ const submit = () => {
                         </div>
                     </div>
 
-                    <div class="mt-6">
+                    <div class="donation-form__submit">
                         <button
                             type="submit"
                             class="btn btn--primary btn--full"
-                            :class="{ 'opacity-25': form.processing }"
+                            :class="{ 'is-busy': form.processing }"
                             :disabled="form.processing"
                         >
                             Crear donación
@@ -303,3 +292,195 @@ const submit = () => {
         </div>
     </AuthenticatedLayout>
 </template>
+
+<style scoped>
+.donation-form__back {
+    margin-bottom: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #148f5b;
+}
+
+.donation-form__back:hover {
+    text-decoration: underline;
+}
+
+.donation-form__back-icon {
+    font-size: 1rem;
+    line-height: 1;
+}
+
+.donation-form__title {
+    margin-bottom: 0.25rem;
+}
+
+.donation-form__subtitle {
+    margin-bottom: 22px;
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #7a8b84;
+}
+
+.donation-form__panel {
+    padding: 1.75rem 1.5rem;
+}
+
+.donation-form__label {
+    margin-bottom: 11px;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.donation-form__label--flush {
+    margin-bottom: 0;
+}
+
+.donation-form__chips {
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px;
+}
+
+.donation-form__chips-error {
+    margin-top: -1rem;
+    margin-bottom: 1rem;
+}
+
+.donation-form__grid {
+    display: grid;
+    gap: 1rem;
+}
+
+.donation-form__grid--tight {
+    margin-bottom: 0.875rem;
+    gap: 0.875rem;
+}
+
+.donation-form__grid--contact {
+    margin-bottom: 1.25rem;
+}
+
+.donation-form__field {
+    margin-bottom: 0;
+}
+
+.donation-form__medical {
+    margin-top: 18px;
+    border-radius: 1rem;
+    border: 1px solid #e6ede9;
+    background-color: #f8faf9;
+    padding: 18px 18px 6px;
+}
+
+.donation-form__medical--required {
+    border-color: #f7d7d2;
+    background-color: #fef4f2;
+}
+
+.donation-form__medical-header {
+    margin-bottom: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 13px;
+    font-weight: 600;
+    color: #5a686d;
+}
+
+.donation-form__medical--required .donation-form__medical-header {
+    color: #c0392b;
+}
+
+.donation-form__medical-icon {
+    display: flex;
+    height: 1.25rem;
+    width: 1.25rem;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #c0392b;
+    font-size: 0.75rem;
+    color: #fff;
+}
+
+.donation-form__divider {
+    margin-block: 1.25rem;
+    height: 1px;
+    background-color: #eef2f1;
+}
+
+.donation-form__items-header {
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.donation-form__items-error {
+    margin-bottom: 0.75rem;
+}
+
+.donation-form__item-icon {
+    font-size: 15px;
+    line-height: 1;
+}
+
+.donation-form__items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.625rem;
+}
+
+.donation-form__item-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    align-items: end;
+    gap: 0.625rem;
+    border-radius: 0.75rem;
+    border: 1px solid #e6ede9;
+    background-color: #f8faf9;
+    padding: 13px;
+}
+
+.donation-form__item-name {
+    grid-column: span 2 / span 2;
+}
+
+.donation-form__item-remove {
+    grid-column: span 2 / span 2;
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.donation-form__submit {
+    margin-top: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .donation-form__grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .donation-form__item-row {
+        grid-template-columns: repeat(12, 1fr);
+    }
+
+    .donation-form__item-name {
+        grid-column: span 5 / span 5;
+    }
+
+    .donation-form__item-quantity,
+    .donation-form__item-unit {
+        grid-column: span 3 / span 3;
+    }
+
+    .donation-form__item-remove {
+        grid-column: span 1 / span 1;
+    }
+}
+</style>

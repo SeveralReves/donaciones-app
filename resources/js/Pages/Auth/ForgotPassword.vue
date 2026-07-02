@@ -25,16 +25,13 @@ const submit = () => {
     <GuestLayout>
         <Head title="Recuperar contraseña" />
 
-        <div class="mb-4 text-sm text-gray-600">
+        <div class="auth-hint">
             ¿Olvidaste tu contraseña? No hay problema. Solo dinos tu correo
             electrónico y te enviaremos un enlace para restablecerla y elegir
             una nueva.
         </div>
 
-        <div
-            v-if="status"
-            class="mb-4 text-sm font-medium text-green-600"
-        >
+        <div v-if="status" class="alert alert--success auth-hint">
             {{ status }}
         </div>
 
@@ -45,19 +42,18 @@ const submit = () => {
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
                     v-model="form.email"
                     required
                     autofocus
                     autocomplete="username"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError :message="form.errors.email" />
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
+            <div class="auth-form__actions">
                 <PrimaryButton
-                    :class="{ 'opacity-25': form.processing }"
+                    :class="{ 'is-busy': form.processing }"
                     :disabled="form.processing"
                 >
                     Enviar enlace de recuperación
@@ -66,3 +62,18 @@ const submit = () => {
         </form>
     </GuestLayout>
 </template>
+
+<style scoped>
+.auth-hint {
+    margin-bottom: 1rem;
+    font-size: 0.875rem;
+    color: #4b5563;
+}
+
+.auth-form__actions {
+    margin-top: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+}
+</style>

@@ -1,0 +1,30 @@
+@use '../abstracts/variables' as *;
+
+// .stack — apila hijos en columna con espaciado uniforme (evita repetir
+// "margin-top" en cada campo de un formulario).
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-md;
+}
+
+// .is-busy — atenúa un elemento mientras una acción está en curso (envíos
+// de formulario en curso).
+.is-busy {
+    opacity: 0.25;
+}
+
+// .sr-only — oculta visualmente un elemento sin quitarlo del árbol de
+// accesibilidad (lectores de pantalla). Único "utility" del proyecto: es un
+// patrón estándar de accesibilidad, no parte de un framework de CSS.
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}

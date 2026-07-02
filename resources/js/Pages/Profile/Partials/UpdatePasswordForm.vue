@@ -36,17 +36,15 @@ const updatePassword = () => {
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Actualizar contraseña
-            </h2>
+            <h2 class="form-section__title">Actualizar contraseña</h2>
 
-            <p class="mt-1 text-sm text-gray-600">
+            <p class="form-section__description">
                 Asegúrate de usar una contraseña larga y aleatoria para
                 mantener tu cuenta segura.
             </p>
         </header>
 
-        <form @submit.prevent="updatePassword" class="mt-6 space-y-6">
+        <form @submit.prevent="updatePassword" class="form-section__body">
             <div>
                 <InputLabel for="current_password" value="Contraseña actual" />
 
@@ -55,14 +53,10 @@ const updatePassword = () => {
                     ref="currentPasswordInput"
                     v-model="form.current_password"
                     type="password"
-                    class="mt-1 block w-full"
                     autocomplete="current-password"
                 />
 
-                <InputError
-                    :message="form.errors.current_password"
-                    class="mt-2"
-                />
+                <InputError :message="form.errors.current_password" />
             </div>
 
             <div>
@@ -73,11 +67,10 @@ const updatePassword = () => {
                     ref="passwordInput"
                     v-model="form.password"
                     type="password"
-                    class="mt-1 block w-full"
                     autocomplete="new-password"
                 />
 
-                <InputError :message="form.errors.password" class="mt-2" />
+                <InputError :message="form.errors.password" />
             </div>
 
             <div>
@@ -90,29 +83,22 @@ const updatePassword = () => {
                     id="password_confirmation"
                     v-model="form.password_confirmation"
                     type="password"
-                    class="mt-1 block w-full"
                     autocomplete="new-password"
                 />
 
-                <InputError
-                    :message="form.errors.password_confirmation"
-                    class="mt-2"
-                />
+                <InputError :message="form.errors.password_confirmation" />
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="form-actions">
                 <PrimaryButton :disabled="form.processing">Guardar</PrimaryButton>
 
                 <Transition
-                    enter-active-class="transition ease-in-out"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
-                    leave-to-class="opacity-0"
+                    enter-active-class="form-actions__message--enter-active"
+                    enter-from-class="form-actions__message--enter-from"
+                    leave-active-class="form-actions__message--leave-active"
+                    leave-to-class="form-actions__message--leave-to"
                 >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
+                    <p v-if="form.recentlySuccessful" class="form-actions__message">
                         Guardado.
                     </p>
                 </Transition>

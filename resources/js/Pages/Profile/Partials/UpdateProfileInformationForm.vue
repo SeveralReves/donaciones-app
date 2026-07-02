@@ -25,33 +25,27 @@ const form = useForm({
 <template>
     <section>
         <header>
-            <h2 class="text-lg font-medium text-gray-900">
-                Información del perfil
-            </h2>
+            <h2 class="form-section__title">Información del perfil</h2>
 
-            <p class="mt-1 text-sm text-gray-600">
+            <p class="form-section__description">
                 Actualiza la información de tu perfil y tu correo electrónico.
             </p>
         </header>
 
-        <form
-            @submit.prevent="form.patch(route('profile.update'))"
-            class="mt-6 space-y-6"
-        >
+        <form @submit.prevent="form.patch(route('profile.update'))" class="form-section__body">
             <div>
                 <InputLabel for="name" value="Nombre" />
 
                 <TextInput
                     id="name"
                     type="text"
-                    class="mt-1 block w-full"
                     v-model="form.name"
                     required
                     autofocus
                     autocomplete="name"
                 />
 
-                <InputError class="mt-2" :message="form.errors.name" />
+                <InputError :message="form.errors.name" />
             </div>
 
             <div>
@@ -60,50 +54,43 @@ const form = useForm({
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full"
                     v-model="form.email"
                     required
                     autocomplete="username"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError :message="form.errors.email" />
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
-                <p class="mt-2 text-sm text-gray-800">
+                <p class="update-profile__unverified">
                     Tu correo electrónico no está verificado.
                     <Link
                         :href="route('verification.send')"
                         method="post"
                         as="button"
-                        class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                        class="link--muted"
                     >
                         Haz clic aquí para reenviar el correo de verificación.
                     </Link>
                 </p>
 
-                <div
-                    v-show="status === 'verification-link-sent'"
-                    class="mt-2 text-sm font-medium text-green-600"
-                >
+                <div v-show="status === 'verification-link-sent'" class="alert alert--success update-profile__sent">
                     Se ha enviado un nuevo enlace de verificación a tu correo
                     electrónico.
                 </div>
             </div>
 
-            <div class="flex items-center gap-4">
+            <div class="form-actions">
                 <PrimaryButton :disabled="form.processing">Guardar</PrimaryButton>
 
                 <Transition
-                    enter-active-class="transition ease-in-out"
-                    enter-from-class="opacity-0"
-                    leave-active-class="transition ease-in-out"
-                    leave-to-class="opacity-0"
+                    enter-active-class="form-actions__message--enter-active"
+                    enter-from-class="form-actions__message--enter-from"
+                    leave-active-class="form-actions__message--leave-active"
+                    leave-to-class="form-actions__message--leave-to"
                 >
-                    <p
-                        v-if="form.recentlySuccessful"
-                        class="text-sm text-gray-600"
-                    >
+                    <p v-if="form.recentlySuccessful" class="form-actions__message">
                         Guardado.
                     </p>
                 </Transition>
@@ -111,3 +98,15 @@ const form = useForm({
         </form>
     </section>
 </template>
+
+<style scoped>
+.update-profile__unverified {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: #1f2937;
+}
+
+.update-profile__sent {
+    margin-top: 0.5rem;
+}
+</style>
