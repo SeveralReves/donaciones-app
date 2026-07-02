@@ -1,4 +1,5 @@
 {
+    "id": "/",
     "name": "Control de Donaciones",
     "short_name": "Donaciones",
     "description": "Registro y seguimiento de donaciones.",
@@ -20,6 +21,22 @@
             "sizes": "512x512",
             "type": "image/png",
             "purpose": "any"
+        }
+    ],
+    "screenshots": [
+        {
+            "src": "/screenshots/desktop-dashboard.png",
+            "sizes": "1280x800",
+            "type": "image/png",
+            "form_factor": "wide",
+            "label": "Panel de control en escritorio"
+        },
+        {
+            "src": "/screenshots/mobile-dashboard.png",
+            "sizes": "390x844",
+            "type": "image/png",
+            "form_factor": "narrow",
+            "label": "Panel de control en móvil"
         }
     ]
 }
