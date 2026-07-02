@@ -57,6 +57,14 @@ const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
                         >
                             Inventario
                         </Link>
+                        <Link
+                            v-if="isAdmin($page.props.auth.user)"
+                            :href="route('admin.needs.index')"
+                            class="app-header__nav-link"
+                            :class="{ 'app-header__nav-link--active': route().current('admin.needs.*') }"
+                        >
+                            Necesidades
+                        </Link>
                     </nav>
                 </div>
 
@@ -180,6 +188,22 @@ const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
                     :class="{ 'bottom-nav__label--active': route().current('admin.stock-items.*') }"
                 >
                     Inventario
+                </span>
+            </Link>
+            <Link
+                v-if="isAdmin($page.props.auth.user)"
+                :href="route('admin.needs.index')"
+                class="bottom-nav__item"
+            >
+                <span
+                    class="bottom-nav__dot"
+                    :class="{ 'bottom-nav__dot--active': route().current('admin.needs.*') }"
+                ></span>
+                <span
+                    class="bottom-nav__label"
+                    :class="{ 'bottom-nav__label--active': route().current('admin.needs.*') }"
+                >
+                    Necesidades
                 </span>
             </Link>
         </nav>

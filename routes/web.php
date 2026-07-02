@@ -1,13 +1,19 @@
 <?php
 
+use App\Http\Controllers\Admin\AdditionalNeedController;
 use App\Http\Controllers\Admin\StockItemController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DonationController;
+use App\Http\Controllers\NeedsController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
 Route::redirect('/', '/login');
+
+// Pública a propósito: se comparte por WhatsApp, sin login ni CSRF de por
+// medio. Es de solo lectura, no expone ninguna acción de escritura.
+Route::get('/necesidades', [NeedsController::class, 'index'])->name('needs.index');
 
 Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])
@@ -35,6 +41,12 @@ Route::middleware(['auth', 'can:manage-stock'])->prefix('admin')->name('admin.')
         ->name('stock-items.adjustments');
     Route::patch('stock-items/{stockItem}/adjust', [StockItemController::class, 'adjustStock'])
         ->name('stock-items.adjust');
+    Route::patch('stock-items/{stockItem}/threshold', [StockItemController::class, 'updateThreshold'])
+        ->name('stock-items.update-threshold');
+
+    Route::resource('needs', AdditionalNeedController::class)->only(['index', 'store']);
+    Route::patch('needs/{additionalNeed}/toggle-active', [AdditionalNeedController::class, 'toggleActive'])
+        ->name('needs.toggle-active');
 });
 
 require __DIR__.'/auth.php';

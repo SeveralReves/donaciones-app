@@ -16,6 +16,7 @@ const form = useForm({
     unit: '',
     donation_type: 'insumos_medicos',
     quantity_available: '',
+    minimum_threshold: '',
 });
 
 const submit = () => {
@@ -98,6 +99,29 @@ const submit = () => {
                         </div>
                     </div>
 
+                    <div class="form-field">
+                        <label for="minimum_threshold" class="form-field__label">
+                            Umbral mínimo (opcional)
+                        </label>
+                        <input
+                            id="minimum_threshold"
+                            v-model="form.minimum_threshold"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Sin definir"
+                            class="form-field__input"
+                        />
+                        <p class="stock-form__hint">
+                            Si lo defines, el insumo se resalta en el listado cuando el stock
+                            disponible caiga por debajo de este número. Déjalo vacío para no
+                            monitorearlo.
+                        </p>
+                        <p v-if="form.errors.minimum_threshold" class="form-field__error">
+                            {{ form.errors.minimum_threshold }}
+                        </p>
+                    </div>
+
                     <div class="stock-form__submit">
                         <button
                             type="submit"
@@ -152,6 +176,12 @@ const submit = () => {
 .stock-form__grid {
     display: grid;
     gap: 1rem;
+}
+
+.stock-form__hint {
+    margin-top: 0.375rem;
+    font-size: 0.75rem;
+    color: #8a969a;
 }
 
 .stock-form__submit {

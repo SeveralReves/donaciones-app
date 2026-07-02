@@ -93,3 +93,48 @@ export function getDeliveryWhatsAppUrl(donation) {
 export function getReceiverWhatsAppUrl(donation) {
     return buildWhatsAppUrl(donation.contact_number, buildReceiverMessage(donation));
 }
+
+/**
+ * A diferencia de buildWhatsAppUrl(phone, message), wa.me sin número no abre
+ * un chat fijo: abre el selector de contacto/grupo de WhatsApp para que
+ * quien comparte elija a quién enviárselo.
+ */
+export function buildWhatsAppShareUrl(message) {
+    return `https://wa.me/?text=${encodeURIComponent(message)}`;
+}
+
+function formatNeedsList(items) {
+    return items
+        .map((item) => `- ${item.name}: ${item.quantity_needed}${item.unit ? ` ${item.unit}` : ''}`)
+        .join('\n');
+}
+
+/**
+ * Mensaje para compartir el resumen de necesidades actuales, agrupadas por
+ * tipo de donación tal como se ven en la página pública /necesidades, más
+ * el link a esa página al final.
+ *
+ * @param {{type: string, items: object[]}[]} groupedStockNeeds - ver
+ * groupStockNeedsByType() en utils/needs.js
+ */
+export function buildNeedsMessage(groupedStockNeeds, additionalNeeds, publicUrl) {
+    const lines = ['Necesidades actuales de la fundación'];
+
+    groupedStockNeeds.forEach((group) => {
+        lines.push('', `${donationTypeLabel(group.type)}:`, formatNeedsList(group.items));
+    });
+
+    if (additionalNeeds.length > 0) {
+        lines.push(
+            '',
+            'Otras necesidades:',
+            additionalNeeds
+                .map((need) => `- ${need.description}${need.quantity_needed ? `: ${need.quantity_needed}` : ''}`)
+                .join('\n'),
+        );
+    }
+
+    lines.push('', `Más detalles: ${publicUrl}`);
+
+    return lines.join('\n');
+}

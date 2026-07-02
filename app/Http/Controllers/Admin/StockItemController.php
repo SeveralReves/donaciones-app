@@ -50,12 +50,29 @@ class StockItemController extends Controller
             'unit' => ['required', Rule::in(StoreDonationRequest::ITEM_UNITS)],
             'donation_type' => ['required', Rule::in(self::DONATION_TYPES)],
             'quantity_available' => ['nullable', 'numeric', 'min:0'],
+            'minimum_threshold' => ['nullable', 'numeric', 'min:0'],
         ]);
 
         StockItem::create([
             ...$validated,
             'quantity_available' => $validated['quantity_available'] ?? 0,
         ]);
+
+        return redirect()->route('admin.stock-items.index');
+    }
+
+    /**
+     * Edición rápida del umbral mínimo desde el listado: no pasa por el
+     * formulario de creación ni afecta el resto de campos del insumo.
+     */
+    public function updateThreshold(Request $request, StockItem $stockItem): RedirectResponse
+    {
+        $validated = $request->validate([
+            // null explícito = "no monitorear este insumo", no un umbral de 0.
+            'minimum_threshold' => ['nullable', 'numeric', 'min:0'],
+        ]);
+
+        $stockItem->update($validated);
 
         return redirect()->route('admin.stock-items.index');
     }

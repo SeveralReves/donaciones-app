@@ -52,6 +52,33 @@ const submitAdjustment = () => {
         onSuccess: () => closeAdjustModal(),
     });
 };
+
+const isBelowThreshold = (item) =>
+    item.minimum_threshold !== null && Number(item.quantity_available) < Number(item.minimum_threshold);
+
+const editingThresholdItem = ref(null);
+
+const thresholdForm = useForm({
+    minimum_threshold: '',
+});
+
+const openThresholdModal = (item) => {
+    editingThresholdItem.value = item;
+    thresholdForm.reset();
+    thresholdForm.clearErrors();
+    thresholdForm.minimum_threshold = item.minimum_threshold ?? '';
+};
+
+const closeThresholdModal = () => {
+    editingThresholdItem.value = null;
+};
+
+const submitThreshold = () => {
+    thresholdForm.patch(route('admin.stock-items.update-threshold', editingThresholdItem.value.id), {
+        preserveScroll: true,
+        onSuccess: () => closeThresholdModal(),
+    });
+};
 </script>
 
 <template>
@@ -93,17 +120,43 @@ const submitAdjustment = () => {
                             <th>Unidad</th>
                             <th class="stock-index__col--md">Tipo</th>
                             <th>Disponible</th>
+                            <th class="stock-index__col--md">Umbral mínimo</th>
                             <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="item in stockItems" :key="item.id">
+                        <tr
+                            v-for="item in stockItems"
+                            :key="item.id"
+                            :class="{ 'stock-index__row--low': isBelowThreshold(item) }"
+                        >
                             <td class="stock-index__name">{{ item.name }}</td>
                             <td>{{ item.unit }}</td>
                             <td class="stock-index__col--md">
                                 {{ donationTypeLabel(item.donation_type) }}
                             </td>
-                            <td class="stock-index__quantity">{{ item.quantity_available }}</td>
+                            <td
+                                class="stock-index__quantity"
+                                :class="{ 'stock-index__quantity--low': isBelowThreshold(item) }"
+                            >
+                                {{ item.quantity_available }}
+                                <span v-if="isBelowThreshold(item)" class="stock-index__low-badge">
+                                    Bajo el mínimo
+                                </span>
+                            </td>
+                            <td class="stock-index__col--md">
+                                <span v-if="item.minimum_threshold !== null">
+                                    {{ item.minimum_threshold }} {{ item.unit }}
+                                </span>
+                                <span v-else class="stock-index__no-threshold">Sin definir</span>
+                                <button
+                                    type="button"
+                                    class="stock-index__threshold-edit"
+                                    @click="openThresholdModal(item)"
+                                >
+                                    Editar
+                                </button>
+                            </td>
                             <td class="stock-index__actions">
                                 <button
                                     type="button"
@@ -184,6 +237,54 @@ const submitAdjustment = () => {
                             :disabled="adjustForm.processing"
                         >
                             Guardar ajuste
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </Modal>
+
+        <Modal :show="editingThresholdItem !== null" @close="closeThresholdModal">
+            <div class="modal__content" v-if="editingThresholdItem">
+                <h2 class="form-section__title">Umbral mínimo — {{ editingThresholdItem.name }}</h2>
+                <p class="form-section__description">
+                    Disponible actual: {{ editingThresholdItem.quantity_available }}
+                    {{ editingThresholdItem.unit }}
+                </p>
+
+                <form @submit.prevent="submitThreshold" class="stock-adjust-form">
+                    <div class="form-field">
+                        <label for="minimum_threshold" class="form-field__label">
+                            Umbral mínimo
+                        </label>
+                        <input
+                            id="minimum_threshold"
+                            v-model="thresholdForm.minimum_threshold"
+                            type="number"
+                            step="0.01"
+                            min="0"
+                            placeholder="Sin definir"
+                            class="form-field__input"
+                        />
+                        <p class="stock-adjust-form__hint">
+                            Déjalo vacío para dejar de monitorear este insumo, incluso si su
+                            stock llega a cero.
+                        </p>
+                        <p v-if="thresholdForm.errors.minimum_threshold" class="form-field__error">
+                            {{ thresholdForm.errors.minimum_threshold }}
+                        </p>
+                    </div>
+
+                    <div class="stock-adjust-form__actions">
+                        <button type="button" class="btn btn--secondary" @click="closeThresholdModal">
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="btn btn--primary"
+                            :class="{ 'is-busy': thresholdForm.processing }"
+                            :disabled="thresholdForm.processing"
+                        >
+                            Guardar umbral
                         </button>
                     </div>
                 </form>
@@ -293,6 +394,49 @@ const submitAdjustment = () => {
 .stock-index__quantity {
     font-weight: 600;
     color: #148f5b;
+}
+
+/* #d97706 = $color-warning (resources/sass/abstracts/_variables.scss) —
+   los estilos scoped de un .vue no pueden @use parciales de Sass, así que
+   se repite el valor tal cual en vez de la variable. */
+.stock-index__row--low {
+    background-color: rgba(217, 119, 6, 0.06);
+}
+
+.stock-index__quantity--low {
+    color: #d97706;
+}
+
+.stock-index__low-badge {
+    margin-left: 0.5rem;
+    display: inline-block;
+    white-space: nowrap;
+    border-radius: 999px;
+    background-color: rgba(217, 119, 6, 0.14);
+    padding: 2px 9px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    color: #d97706;
+    vertical-align: middle;
+}
+
+.stock-index__no-threshold {
+    color: #8a969a;
+}
+
+.stock-index__threshold-edit {
+    margin-left: 0.5rem;
+    border: none;
+    background: none;
+    padding: 0;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #148f5b;
+    cursor: pointer;
+}
+
+.stock-index__threshold-edit:hover {
+    text-decoration: underline;
 }
 
 .stock-index__actions {

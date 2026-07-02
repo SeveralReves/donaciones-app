@@ -41,7 +41,7 @@
         gap: $spacing-md;
 
         @include respond(tablet) {
-            gap: 1.75rem;
+            gap: .25rem;
         }
     }
 
