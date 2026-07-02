@@ -1,0 +1,90 @@
+const DONATION_TYPE_LABELS = {
+    insumos_medicos: 'Insumos médicos',
+    higiene: 'Higiene',
+    alimentos: 'Alimentos',
+    otros: 'Otros',
+};
+
+function donationTypeLabel(donationType) {
+    return DONATION_TYPE_LABELS[donationType] ?? donationType;
+}
+
+function formatItemsList(items) {
+    return (items ?? [])
+        .map((item) => `- ${item.name}: ${item.quantity}${item.unit ? ` ${item.unit}` : ''}`)
+        .join('\n');
+}
+
+/**
+ * Mensaje dirigido al delivery: qué debe llevar, a dónde, y quién lo recibe.
+ * No incluye cédula ni el código médico completo, solo nombre y (si aplica)
+ * servicio de quien recibe.
+ */
+export function buildDeliveryMessage(donation) {
+    const lines = [
+        'Nueva entrega de donación',
+        '',
+        `Tipo: ${donationTypeLabel(donation.donation_type)}`,
+        `Destino: ${donation.location}`,
+        '',
+        'Artículos:',
+        formatItemsList(donation.items),
+        '',
+        `Quien recibe: ${donation.receiving_doctor_name || '—'}`,
+    ];
+
+    if (donation.donation_type === 'insumos_medicos' && donation.receiving_service) {
+        lines.push(`Servicio: ${donation.receiving_service}`);
+    }
+
+    lines.push(`Contacto: ${donation.contact_number || '—'}`);
+
+    return lines.join('\n');
+}
+
+/**
+ * Mensaje dirigido a quien recibe: qué le van a entregar y quién lo trae.
+ * No incluye cédula.
+ */
+export function buildReceiverMessage(donation) {
+    const lines = [
+        'Donación en camino',
+        '',
+        `Tipo: ${donationTypeLabel(donation.donation_type)}`,
+        '',
+        'Artículos:',
+        formatItemsList(donation.items),
+        '',
+        `Delivery: ${donation.delivery_name || '—'}`,
+        `Contacto del delivery: ${donation.delivery_contact || '—'}`,
+        `Vehículo: ${donation.vehicle_type || '—'}`,
+    ];
+
+    return lines.join('\n');
+}
+
+function cleanPhoneNumber(phone) {
+    return String(phone ?? '').replace(/\D/g, '');
+}
+
+/**
+ * @returns {string|null} URL de wa.me, o null si el teléfono queda vacío
+ * tras limpiar los caracteres que no son dígitos.
+ */
+export function buildWhatsAppUrl(phone, message) {
+    const cleaned = cleanPhoneNumber(phone);
+
+    if (! cleaned) {
+        return null;
+    }
+
+    return `https://wa.me/${cleaned}?text=${encodeURIComponent(message)}`;
+}
+
+export function getDeliveryWhatsAppUrl(donation) {
+    return buildWhatsAppUrl(donation.delivery_contact, buildDeliveryMessage(donation));
+}
+
+export function getReceiverWhatsAppUrl(donation) {
+    return buildWhatsAppUrl(donation.contact_number, buildReceiverMessage(donation));
+}
