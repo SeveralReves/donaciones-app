@@ -30,6 +30,7 @@ const statuses = [
     'esperando_delivery',
     'en_camino',
     'recibido',
+    'cancelada',
 ];
 
 const donationTypes = ['insumos_medicos', 'higiene', 'alimentos', 'otros'];

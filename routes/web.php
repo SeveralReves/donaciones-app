@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\StockItemController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DonationController;
@@ -26,6 +27,14 @@ Route::middleware(['auth', 'can:manage-users'])->prefix('admin')->name('admin.')
     Route::resource('users', AdminUserController::class)->except(['show', 'destroy']);
     Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])
         ->name('users.reset-password');
+});
+
+Route::middleware(['auth', 'can:manage-stock'])->prefix('admin')->name('admin.')->group(function () {
+    Route::resource('stock-items', StockItemController::class)->only(['index', 'create', 'store']);
+    Route::get('stock-items/{stockItem}/adjustments', [StockItemController::class, 'adjustments'])
+        ->name('stock-items.adjustments');
+    Route::patch('stock-items/{stockItem}/adjust', [StockItemController::class, 'adjustStock'])
+        ->name('stock-items.adjust');
 });
 
 require __DIR__.'/auth.php';

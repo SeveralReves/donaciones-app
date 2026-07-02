@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Modal from '@/Components/Modal.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { getDeliveryWhatsAppUrl, getReceiverWhatsAppUrl } from '@/utils/whatsapp';
@@ -70,6 +71,34 @@ const advance = () => {
 
 const formatDate = (value) => new Date(value).toLocaleString();
 
+const canCancel = computed(
+    () => ! ['recibido', 'cancelada'].includes(props.donation.status),
+);
+
+const showCancelModal = ref(false);
+
+const cancelForm = useForm({
+    status: 'cancelada',
+    cancellation_reason: '',
+});
+
+const openCancelModal = () => {
+    cancelForm.reset();
+    cancelForm.clearErrors();
+    showCancelModal.value = true;
+};
+
+const closeCancelModal = () => {
+    showCancelModal.value = false;
+};
+
+const submitCancellation = () => {
+    cancelForm.patch(route('donations.update-status', props.donation.id), {
+        preserveScroll: true,
+        onSuccess: () => closeCancelModal(),
+    });
+};
+
 const deliveryAssigned = computed(
     () => Boolean(props.donation.vehicle_type && props.donation.delivery_name),
 );
@@ -98,14 +127,29 @@ const receiverWhatsAppUrl = computed(() =>
 
             <div class="donation-detail__sections">
                 <div class="surface">
-                    <h3 class="donation-detail__heading">
-                        Estado actual:
-                        <span
-                            :class="`donation-card__status donation-card__status--${donation.status}`"
+                    <div class="donation-detail__status-row">
+                        <h3 class="donation-detail__heading">
+                            Estado actual:
+                            <span
+                                :class="`donation-card__status donation-card__status--${donation.status}`"
+                            >
+                                {{ donationStatusLabel(donation.status) }}
+                            </span>
+                        </h3>
+
+                        <button
+                            v-if="canCancel"
+                            type="button"
+                            class="btn btn--danger donation-detail__cancel-btn"
+                            @click="openCancelModal"
                         >
-                            {{ donationStatusLabel(donation.status) }}
-                        </span>
-                    </h3>
+                            Cancelar donación
+                        </button>
+                    </div>
+
+                    <p v-if="donation.status === 'cancelada' && donation.cancellation_reason" class="donation-detail__cancellation-reason">
+                        <strong>Motivo de cancelación:</strong> {{ donation.cancellation_reason }}
+                    </p>
 
                     <dl class="donation-detail__fields">
                         <div>
@@ -297,11 +341,63 @@ const receiverWhatsAppUrl = computed(() =>
                             <div class="status-timeline__actor">
                                 por {{ log.changed_by?.name ?? '—' }}
                             </div>
+                            <div
+                                v-if="log.to_status === 'cancelada' && donation.cancellation_reason"
+                                class="status-timeline__reason"
+                            >
+                                Motivo: {{ donation.cancellation_reason }}
+                            </div>
                         </li>
                     </ol>
                 </div>
             </div>
         </div>
+
+        <Modal :show="showCancelModal" @close="closeCancelModal">
+            <div class="modal__content">
+                <h2 class="form-section__title">Cancelar donación</h2>
+                <p class="form-section__description">
+                    Esta acción no se puede deshacer. Si algún artículo tenía stock reservado
+                    del catálogo, se devolverá automáticamente a la cantidad disponible.
+                </p>
+
+                <form @submit.prevent="submitCancellation" class="cancel-donation-form">
+                    <div class="form-field">
+                        <label for="cancellation_reason" class="form-field__label">
+                            Motivo de la cancelación
+                        </label>
+                        <textarea
+                            id="cancellation_reason"
+                            v-model="cancelForm.cancellation_reason"
+                            class="form-field__input"
+                            rows="3"
+                            required
+                        ></textarea>
+                        <p v-if="cancelForm.errors.cancellation_reason" class="form-field__error">
+                            {{ cancelForm.errors.cancellation_reason }}
+                        </p>
+                    </div>
+
+                    <p v-if="cancelForm.errors.status" class="form-field__error">
+                        {{ cancelForm.errors.status }}
+                    </p>
+
+                    <div class="cancel-donation-form__actions">
+                        <button type="button" class="btn btn--secondary" @click="closeCancelModal">
+                            Volver
+                        </button>
+                        <button
+                            type="submit"
+                            class="btn btn--danger"
+                            :class="{ 'is-busy': cancelForm.processing }"
+                            :disabled="cancelForm.processing"
+                        >
+                            Confirmar cancelación
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </Modal>
     </AuthenticatedLayout>
 </template>
 
@@ -339,6 +435,29 @@ const receiverWhatsAppUrl = computed(() =>
     font-size: 0.875rem;
     font-weight: 600;
     color: #5a686d;
+}
+
+.donation-detail__status-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.donation-detail__cancel-btn {
+    min-height: 36px;
+    padding: 6px 14px;
+    font-size: 0.8125rem;
+}
+
+.donation-detail__cancellation-reason {
+    margin-top: 0.75rem;
+    border-radius: 0.75rem;
+    background-color: #fbeae8;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    color: #c0392b;
 }
 
 .donation-detail__fields {
@@ -400,6 +519,24 @@ const receiverWhatsAppUrl = computed(() =>
 
 .donation-detail__timeline-start {
     font-style: italic;
+}
+
+.status-timeline__reason {
+    font-size: 0.8125rem;
+    color: #c0392b;
+}
+
+.cancel-donation-form {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.cancel-donation-form__actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
 }
 
 @media (min-width: 768px) {

@@ -6,10 +6,12 @@ use App\Http\Requests\StoreDonationRequest;
 use App\Http\Requests\UpdateDonationStatusRequest;
 use App\Models\Donation;
 use App\Models\MedicalReceiver;
+use App\Models\StockItem;
 use App\Services\DonationStatusFlow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -46,7 +48,12 @@ class DonationController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('Donations/Create');
+        return Inertia::render('Donations/Create', [
+            'stockItems' => StockItem::query()
+                ->where('active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'unit', 'donation_type', 'quantity_available']),
+        ]);
     }
 
     public function store(StoreDonationRequest $request): RedirectResponse
@@ -63,6 +70,27 @@ class DonationController extends Controller
             ]);
 
             foreach ($items as $item) {
+                if ($item['stock_item_id'] ?? null) {
+                    // Bloquea la fila: dos donaciones creándose a la vez no
+                    // deben poder leer la misma cantidad disponible y
+                    // descontar ambas más de lo que realmente hay.
+                    $stockItem = StockItem::whereKey($item['stock_item_id'])->lockForUpdate()->firstOrFail();
+
+                    if ($item['quantity'] > $stockItem->quantity_available) {
+                        throw ValidationException::withMessages([
+                            'items' => "No hay suficiente stock de \"{$stockItem->name}\" para completar la donación.",
+                        ]);
+                    }
+
+                    // El nombre/unidad se toman del catálogo, no de lo que
+                    // haya mandado el cliente, para que el registro de la
+                    // donación quede consistente con el insumo real.
+                    $item['name'] = $stockItem->name;
+                    $item['unit'] = $stockItem->unit;
+
+                    $stockItem->decrement('quantity_available', $item['quantity']);
+                }
+
                 $donation->items()->create($item);
             }
 
@@ -129,6 +157,18 @@ class DonationController extends Controller
 
             $donation->status = $targetStatus;
             $donation->save();
+
+            if ($targetStatus === DonationStatusFlow::CANCELLED) {
+                // Devuelve al catálogo solo lo que salió de él: los items
+                // de texto libre (stock_item_id null) nunca descontaron
+                // nada, así que no hay nada que revertir para ellos.
+                foreach ($donation->items()->whereNotNull('stock_item_id')->get() as $item) {
+                    StockItem::whereKey($item->stock_item_id)
+                        ->lockForUpdate()
+                        ->firstOrFail()
+                        ->increment('quantity_available', $item->quantity);
+                }
+            }
 
             $donation->statusLogs()->create([
                 'from_status' => $fromStatus,

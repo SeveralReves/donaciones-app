@@ -11,6 +11,7 @@ export const DONATION_STATUS_LABELS = {
     esperando_delivery: 'Esperando delivery',
     en_camino: 'En camino',
     recibido: 'Recibido',
+    cancelada: 'Cancelada',
 };
 
 export function donationTypeLabel(donationType) {

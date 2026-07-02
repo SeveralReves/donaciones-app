@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests;
 
+use App\Models\StockItem;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Validator;
 
 class StoreDonationRequest extends FormRequest
 {
@@ -29,8 +31,20 @@ class StoreDonationRequest extends FormRequest
 
         $this->merge([
             'items' => array_map(function ($item) {
-                if (is_array($item) && ($item['unit'] ?? null) === '') {
+                if (! is_array($item)) {
+                    return $item;
+                }
+
+                if (($item['unit'] ?? null) === '') {
                     $item['unit'] = null;
+                }
+
+                // El select de Create.vue usa '' (nada elegido todavía) y
+                // 'otro' (especificar a mano) como valores centinela para
+                // "este item no viene del catálogo"; ambos deben guardarse
+                // como null, no como el string literal.
+                if (in_array($item['stock_item_id'] ?? null, ['', 'otro'], true)) {
+                    $item['stock_item_id'] = null;
                 }
 
                 return $item;
@@ -52,8 +66,13 @@ class StoreDonationRequest extends FormRequest
             'location' => ['required', 'string', 'max:255'],
 
             'items' => ['required', 'array', 'min:1'],
-            'items.*.name' => ['required', 'string', 'max:255'],
-            'items.*.quantity' => ['required', 'numeric'],
+            'items.*.stock_item_id' => ['nullable', 'string', Rule::exists('stock_items', 'id')->where('active', true)],
+            // Obligatorio solo cuando no viene del catálogo (stock_item_id
+            // null); esa condición se valida aparte en withValidator()
+            // porque depende del valor de un campo hermano dentro del mismo
+            // item del array.
+            'items.*.name' => ['nullable', 'string', 'max:255'],
+            'items.*.quantity' => ['required', 'numeric', 'gt:0'],
             'items.*.unit' => ['nullable', Rule::in(self::ITEM_UNITS)],
 
             'patient_name' => ['nullable', 'string', 'max:255'],
@@ -75,5 +94,73 @@ class StoreDonationRequest extends FormRequest
             'receiving_service.required' => 'El servicio del médico es obligatorio cuando la donación es de insumos médicos.',
             'items.*.unit.in' => 'La unidad debe ser una de: '.implode(', ', self::ITEM_UNITS).'.',
         ];
+    }
+
+    /**
+     * Reglas que dependen de más de un campo del mismo item (nombre
+     * obligatorio solo si no viene del catálogo; cantidad acotada al stock
+     * disponible), así que no se pueden expresar como reglas planas de
+     * rules().
+     */
+    public function withValidator(Validator $validator): void
+    {
+        $validator->after(function (Validator $validator): void {
+            $items = $this->input('items', []);
+
+            if (! is_array($items)) {
+                return;
+            }
+
+            $donationType = $this->input('donation_type');
+            $requestedByStockItem = [];
+
+            foreach ($items as $index => $item) {
+                if (! is_array($item)) {
+                    continue;
+                }
+
+                $stockItemId = $item['stock_item_id'] ?? null;
+
+                if (blank($stockItemId)) {
+                    if (blank($item['name'] ?? null)) {
+                        $validator->errors()->add("items.$index.name", 'El nombre del artículo es obligatorio.');
+                    }
+
+                    continue;
+                }
+
+                $stockItem = StockItem::find($stockItemId);
+
+                if (! $stockItem) {
+                    continue; // ya lo rechaza la regla exists de items.*.stock_item_id
+                }
+
+                if ($stockItem->donation_type !== $donationType) {
+                    $validator->errors()->add(
+                        "items.$index.stock_item_id",
+                        "\"{$stockItem->name}\" no pertenece al tipo de donación seleccionado.",
+                    );
+
+                    continue;
+                }
+
+                // Si el mismo insumo del catálogo aparece en más de una
+                // fila, la cantidad pedida es la suma de todas —
+                // descontarlas por separado igual dejaría el stock en
+                // negativo si cada fila individualmente pasa pero la suma
+                // no cabe.
+                $requestedByStockItem[$stockItemId] ??= ['stock_item' => $stockItem, 'quantity' => 0, 'index' => $index];
+                $requestedByStockItem[$stockItemId]['quantity'] += (float) ($item['quantity'] ?? 0);
+            }
+
+            foreach ($requestedByStockItem as $data) {
+                if ($data['quantity'] > $data['stock_item']->quantity_available) {
+                    $validator->errors()->add(
+                        "items.{$data['index']}.quantity",
+                        "No hay suficiente stock de \"{$data['stock_item']->name}\": disponible {$data['stock_item']->quantity_available}, solicitado {$data['quantity']}.",
+                    );
+                }
+            }
+        });
     }
 }

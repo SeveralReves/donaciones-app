@@ -15,6 +15,7 @@ class DonationItem extends Model
 
     protected $fillable = [
         'donation_id',
+        'stock_item_id',
         'name',
         'quantity',
         'unit',
@@ -30,5 +31,10 @@ class DonationItem extends Model
     public function donation(): BelongsTo
     {
         return $this->belongsTo(Donation::class);
+    }
+
+    public function stockItem(): BelongsTo
+    {
+        return $this->belongsTo(StockItem::class);
     }
 }

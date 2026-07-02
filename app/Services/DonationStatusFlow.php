@@ -24,6 +24,34 @@ class DonationStatusFlow
     ];
 
     /**
+     * Estado terminal fuera de la secuencia normal: una donación puede
+     * cancelarse en vez de avanzar, pero 'cancelada' no es "el siguiente
+     * estado" de ninguno de los anteriores, así que vive aparte de SEQUENCE
+     * en vez de alterar nextStatus().
+     */
+    public const CANCELLED = 'cancelada';
+
+    /**
+     * Todos los valores válidos de donations.status: la secuencia de avance
+     * más el estado terminal de cancelación.
+     *
+     * @return list<string>
+     */
+    public static function allStatuses(): array
+    {
+        return [...self::SEQUENCE, self::CANCELLED];
+    }
+
+    /**
+     * Una donación se puede cancelar desde cualquier estado salvo el final
+     * ('recibido', ya se completó) y el propio 'cancelada' (ya lo está).
+     */
+    public static function canCancel(string $currentStatus): bool
+    {
+        return ! in_array($currentStatus, ['recibido', self::CANCELLED], true);
+    }
+
+    /**
      * El único estado al que se puede avanzar desde el actual, o null si ya
      * está en el último estado de la secuencia.
      */
@@ -55,6 +83,7 @@ class DonationStatusFlow
                     : []),
             ],
             'esperando_delivery' => ['vehicle_type', 'delivery_name'],
+            self::CANCELLED => ['cancellation_reason'],
             default => [],
         };
     }
@@ -110,6 +139,7 @@ class DonationStatusFlow
             'vehicle_type' => 'tipo de vehículo',
             'delivery_name' => 'nombre de quien entrega',
             'delivery_contact' => 'contacto del delivery (opcional)',
+            'cancellation_reason' => 'motivo de la cancelación',
         ];
     }
 }

@@ -33,6 +33,7 @@
 
     &__overlay {
         position: fixed;
+        z-index: 0;
         inset: 0;
 
         &--enter-active {
@@ -62,6 +63,8 @@
     }
 
     &__panel {
+        position: relative;
+        z-index: 1;
         margin-bottom: 1.5rem;
         overflow: hidden;
         border-radius: 0.5rem;

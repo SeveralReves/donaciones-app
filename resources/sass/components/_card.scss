@@ -81,6 +81,11 @@
             background-color: $status-recibido-bg;
             color: $status-recibido-color;
         }
+
+        &--cancelada {
+            background-color: $status-cancelada-bg;
+            color: $status-cancelada-color;
+        }
     }
 }
 

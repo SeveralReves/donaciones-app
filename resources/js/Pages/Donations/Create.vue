@@ -3,6 +3,13 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
+const props = defineProps({
+    stockItems: {
+        type: Array,
+        default: () => [],
+    },
+});
+
 const donationTypes = [
     { value: 'insumos_medicos', label: 'Insumos médicos' },
     { value: 'higiene', label: 'Higiene' },
@@ -11,6 +18,8 @@ const donationTypes = [
 ];
 
 const itemUnits = ['unidades', 'cajas', 'kg', 'litros', 'paquetes', 'frascos'];
+
+const blankItem = () => ({ stock_item_id: '', name: '', quantity: '', unit: '' });
 
 const form = useForm({
     donation_type: 'insumos_medicos',
@@ -21,15 +30,43 @@ const form = useForm({
     receiving_service: '',
     contact_number: '',
     cedula: '',
-    items: [{ name: '', quantity: '', unit: '' }],
+    items: [blankItem()],
 });
 
 const requiresDoctor = computed(
     () => form.donation_type === 'insumos_medicos',
 );
 
+// Catálogo filtrado al tipo de donación elegido: cada tipo tiene su propia
+// lista de insumos, así que no tiene sentido ofrecer "Guantes de nitrilo" al
+// donar alimentos.
+const availableStockItems = computed(() =>
+    props.stockItems.filter((stockItem) => stockItem.donation_type === form.donation_type),
+);
+
+const stockItemById = (id) => props.stockItems.find((stockItem) => stockItem.id === id);
+
+const selectDonationType = (type) => {
+    form.donation_type = type;
+    // Los insumos elegidos son del catálogo de otro tipo; en vez de dejar
+    // selecciones inválidas que solo se notarían al enviar, se reinicia.
+    form.items = [blankItem()];
+};
+
+const onStockItemChange = (item) => {
+    if (item.stock_item_id === 'otro' || item.stock_item_id === '') {
+        item.name = '';
+        item.unit = '';
+        return;
+    }
+
+    const stockItem = stockItemById(item.stock_item_id);
+    item.name = stockItem?.name ?? '';
+    item.unit = stockItem?.unit ?? '';
+};
+
 const addItem = () => {
-    form.items.push({ name: '', quantity: '', unit: '' });
+    form.items.push(blankItem());
 };
 
 const removeItem = (index) => {
@@ -65,7 +102,7 @@ const submit = () => {
                             type="button"
                             class="chip"
                             :class="{ 'chip--active': form.donation_type === type.value }"
-                            @click="form.donation_type = type.value"
+                            @click="selectDonationType(type.value)"
                         >
                             {{ type.label }}
                         </button>
@@ -213,18 +250,41 @@ const submit = () => {
                             class="donation-form__item-row"
                         >
                             <div class="form-field donation-form__field donation-form__item-name">
-                                <label :for="`item-name-${index}`" class="form-field__label">Nombre</label>
-                                <input
-                                    :id="`item-name-${index}`"
-                                    v-model="item.name"
-                                    type="text"
-                                    placeholder="Ej. Gasas estériles"
-                                    class="form-field__input"
+                                <label :for="`item-stock-${index}`" class="form-field__label">Insumo</label>
+                                <select
+                                    :id="`item-stock-${index}`"
+                                    v-model="item.stock_item_id"
+                                    class="form-field__select"
                                     required
-                                />
-                                <p v-if="form.errors[`items.${index}.name`]" class="form-field__error">
-                                    {{ form.errors[`items.${index}.name`] }}
+                                    @change="onStockItemChange(item)"
+                                >
+                                    <option value="" disabled>Selecciona un insumo</option>
+                                    <option
+                                        v-for="stockItem in availableStockItems"
+                                        :key="stockItem.id"
+                                        :value="stockItem.id"
+                                    >
+                                        {{ stockItem.name }} ({{ stockItem.quantity_available }} {{ stockItem.unit }} disponibles)
+                                    </option>
+                                    <option value="otro">Otro (especificar)</option>
+                                </select>
+                                <p v-if="form.errors[`items.${index}.stock_item_id`]" class="form-field__error">
+                                    {{ form.errors[`items.${index}.stock_item_id`] }}
                                 </p>
+
+                                <template v-if="item.stock_item_id === 'otro'">
+                                    <input
+                                        :id="`item-name-${index}`"
+                                        v-model="item.name"
+                                        type="text"
+                                        placeholder="Nombre del artículo"
+                                        class="form-field__input donation-form__item-other-name"
+                                        required
+                                    />
+                                    <p v-if="form.errors[`items.${index}.name`]" class="form-field__error">
+                                        {{ form.errors[`items.${index}.name`] }}
+                                    </p>
+                                </template>
                             </div>
 
                             <div class="form-field donation-form__field donation-form__item-quantity">
@@ -234,10 +294,15 @@ const submit = () => {
                                     v-model="item.quantity"
                                     type="number"
                                     step="0.01"
+                                    min="0.01"
                                     placeholder="0"
                                     class="form-field__input"
                                     required
                                 />
+                                <p v-if="stockItemById(item.stock_item_id)" class="donation-form__item-hint">
+                                    Disponible: {{ stockItemById(item.stock_item_id).quantity_available }}
+                                    {{ stockItemById(item.stock_item_id).unit }}
+                                </p>
                                 <p v-if="form.errors[`items.${index}.quantity`]" class="form-field__error">
                                     {{ form.errors[`items.${index}.quantity`] }}
                                 </p>
@@ -246,6 +311,7 @@ const submit = () => {
                             <div class="form-field donation-form__field donation-form__item-unit">
                                 <label :for="`item-unit-${index}`" class="form-field__label">Unidad</label>
                                 <select
+                                    v-if="item.stock_item_id === 'otro'"
                                     :id="`item-unit-${index}`"
                                     v-model="item.unit"
                                     class="form-field__select"
@@ -259,6 +325,14 @@ const submit = () => {
                                         {{ unit }}
                                     </option>
                                 </select>
+                                <input
+                                    v-else
+                                    :id="`item-unit-${index}`"
+                                    :value="item.unit || '—'"
+                                    type="text"
+                                    class="form-field__input"
+                                    disabled
+                                />
                                 <p v-if="form.errors[`items.${index}.unit`]" class="form-field__error">
                                     {{ form.errors[`items.${index}.unit`] }}
                                 </p>
@@ -448,6 +522,16 @@ const submit = () => {
 
 .donation-form__item-name {
     grid-column: span 2 / span 2;
+}
+
+.donation-form__item-other-name {
+    margin-top: 0.5rem;
+}
+
+.donation-form__item-hint {
+    margin-top: 0.375rem;
+    font-size: 0.75rem;
+    color: #8a969a;
 }
 
 .donation-form__item-remove {

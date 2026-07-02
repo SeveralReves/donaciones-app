@@ -27,6 +27,7 @@ class Donation extends Model
         'delivery_name',
         'delivery_contact',
         'status',
+        'cancellation_reason',
         'created_by',
     ];
 

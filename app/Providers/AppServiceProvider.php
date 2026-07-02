@@ -25,5 +25,10 @@ class AppServiceProvider extends ServiceProvider
         Vite::prefetch(concurrency: 3);
 
         Gate::define('manage-users', fn (User $user): bool => $user->rol === 'admin');
+
+        // Separado de 'manage-users' aunque hoy ambos exigen lo mismo: el
+        // inventario es un dominio distinto al de usuarios y podría abrirse
+        // a un rol propio (p. ej. bodega) sin tocar el permiso de usuarios.
+        Gate::define('manage-stock', fn (User $user): bool => $user->rol === 'admin');
     }
 }

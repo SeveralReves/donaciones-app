@@ -21,7 +21,7 @@ class UpdateDonationStatusRequest extends FormRequest
         $donation = $this->route('donation');
 
         $rules = [
-            'status' => ['required', Rule::in(DonationStatusFlow::SEQUENCE)],
+            'status' => ['required', Rule::in(DonationStatusFlow::allStatuses())],
         ];
 
         foreach (DonationStatusFlow::requiredFields($donation, $this->input('status', '')) as $field) {
@@ -51,13 +51,29 @@ class UpdateDonationStatusRequest extends FormRequest
         $validator->after(function (Validator $validator): void {
             /** @var Donation $donation */
             $donation = $this->route('donation');
+            $target = $this->input('status');
+
+            // Cancelar es una transición aparte de la secuencia normal: se
+            // permite desde cualquier estado salvo 'recibido'/'cancelada',
+            // no solo desde "el siguiente" como el resto de los estados.
+            if ($target === DonationStatusFlow::CANCELLED) {
+                if (! DonationStatusFlow::canCancel($donation->status)) {
+                    $validator->errors()->add(
+                        'status',
+                        "No se puede cancelar una donación en estado '{$donation->status}'."
+                    );
+                }
+
+                return;
+            }
+
             $expected = DonationStatusFlow::nextStatus($donation->status);
 
-            if ($this->input('status') !== $expected) {
+            if ($target !== $expected) {
                 $validator->errors()->add(
                     'status',
                     $expected
-                        ? "No se puede pasar de '{$donation->status}' a '{$this->input('status')}'. El único siguiente estado válido es '{$expected}'."
+                        ? "No se puede pasar de '{$donation->status}' a '{$target}'. El único siguiente estado válido es '{$expected}'."
                         : "La donación ya está en su estado final ('{$donation->status}') y no puede avanzar más."
                 );
             }
