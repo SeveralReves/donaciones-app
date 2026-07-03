@@ -1,7 +1,9 @@
 export const DONATION_TYPE_LABELS = {
     insumos_medicos: 'Insumos médicos',
+    medicinas: 'Medicinas',
     higiene: 'Higiene',
     alimentos: 'Alimentos',
+    miscelaneos: 'Misceláneos',
     otros: 'Otros',
 };
 

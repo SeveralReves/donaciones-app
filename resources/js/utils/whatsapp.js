@@ -24,7 +24,7 @@ export function buildDeliveryMessage(donation) {
         `Quien recibe: ${donation.receiving_doctor_name || '—'}`,
     ];
 
-    if (donation.donation_type === 'insumos_medicos' && donation.receiving_service) {
+    if (donation.receiving_service) {
         lines.push(`Servicio: ${donation.receiving_service}`);
     }
 

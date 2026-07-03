@@ -34,7 +34,7 @@ const statuses = [
     'cancelada',
 ];
 
-const donationTypes = ['insumos_medicos', 'higiene', 'alimentos', 'otros'];
+const donationTypes = ['insumos_medicos', 'medicinas', 'higiene', 'alimentos', 'miscelaneos', 'otros'];
 
 const filters = reactive({
     status: props.filters.status ?? '',

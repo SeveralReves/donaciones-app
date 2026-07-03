@@ -51,7 +51,7 @@ const statusBarColors = {
     recibido: '#148f5b',
 };
 
-const donationTypes = ['insumos_medicos', 'higiene', 'alimentos', 'otros'];
+const donationTypes = ['insumos_medicos', 'medicinas', 'higiene', 'alimentos', 'miscelaneos', 'otros'];
 
 const maxStatusCount = computed(() =>
     Math.max(1, ...statuses.map((status) => props.statusCounts[status] ?? 0)),
