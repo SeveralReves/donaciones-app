@@ -11,6 +11,7 @@ use App\Services\DonationStatusFlow;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -48,6 +49,8 @@ class DonationController extends Controller
 
     public function create(): Response
     {
+        Gate::authorize('create-donations');
+
         return Inertia::render('Donations/Create', [
             'stockItems' => StockItem::query()
                 ->where('active', true)

@@ -74,7 +74,7 @@ class UserController extends Controller
                 Rule::unique('users', 'email')->ignore($user?->id),
             ],
             'password' => $user ? ['sometimes'] : ['required', 'string', 'min:8'],
-            'rol' => ['required', Rule::in(['admin', 'medico', 'odontologo'])],
+            'rol' => ['required', Rule::in(['admin', 'medico', 'odontologo', 'voluntario'])],
             'codigo_medico' => ['nullable', 'string', 'max:255'],
             'servicio' => ['nullable', 'string', 'max:255'],
         ]);

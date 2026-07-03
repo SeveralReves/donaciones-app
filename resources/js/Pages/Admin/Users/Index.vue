@@ -26,6 +26,18 @@ const filteredUsers = computed(() => {
 });
 
 const initial = (name) => name.trim().charAt(0).toUpperCase();
+
+const roleBadgeClass = (rol) => {
+    if (rol === 'admin') {
+        return 'users-index__role--admin';
+    }
+
+    if (rol === 'voluntario') {
+        return 'users-index__role--volunteer';
+    }
+
+    return 'users-index__role--medical';
+};
 </script>
 
 <template>
@@ -76,7 +88,7 @@ const initial = (name) => name.trim().charAt(0).toUpperCase();
                             <td>
                                 <span
                                     class="users-index__role"
-                                    :class="user.rol === 'admin' ? 'users-index__role--admin' : 'users-index__role--medical'"
+                                    :class="roleBadgeClass(user.rol)"
                                 >
                                     {{ userRoleLabel(user.rol) }}
                                 </span>
@@ -226,6 +238,11 @@ const initial = (name) => name.trim().charAt(0).toUpperCase();
 .users-index__role--medical {
     background-color: #e7f3ec;
     color: #148f5b;
+}
+
+.users-index__role--volunteer {
+    background-color: #efeef8;
+    color: #6d67b0;
 }
 
 .users-index__actions {

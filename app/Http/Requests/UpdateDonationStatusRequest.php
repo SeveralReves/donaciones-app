@@ -67,6 +67,15 @@ class UpdateDonationStatusRequest extends FormRequest
                 return;
             }
 
+            if (! DonationStatusFlow::canTransitionTo($this->user(), $target)) {
+                $validator->errors()->add(
+                    'status',
+                    'Confirmar la recepción de una donación requiere un rol con permiso para hacerlo (admin, médico u odontólogo).'
+                );
+
+                return;
+            }
+
             $expected = DonationStatusFlow::nextStatus($donation->status);
 
             if ($target !== $expected) {

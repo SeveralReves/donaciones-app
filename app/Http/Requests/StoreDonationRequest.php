@@ -5,11 +5,20 @@ namespace App\Http\Requests;
 use App\Models\StockItem;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Validator;
 
 class StoreDonationRequest extends FormRequest
 {
+    /**
+     * Los voluntarios no pueden registrar donaciones nuevas.
+     */
+    public function authorize(): bool
+    {
+        return Gate::allows('create-donations');
+    }
+
     /**
      * Opciones válidas para items.*.unit. Debe mantenerse en sincronía con
      * el select de resources/js/Pages/Donations/Create.vue.

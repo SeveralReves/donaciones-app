@@ -79,6 +79,7 @@ const resetPassword = () => {
                             <option value="admin">Admin</option>
                             <option value="medico">Médico</option>
                             <option value="odontologo">Odontólogo</option>
+                            <option value="voluntario">Voluntario</option>
                         </select>
                         <InputError :message="form.errors.rol" />
                     </div>

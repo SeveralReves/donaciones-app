@@ -1,8 +1,9 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link, router } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, reactive, watch } from 'vue';
 import { donationStatusLabel, donationTypeLabel } from '@/utils/labels';
+import { canCreateDonations } from '@/utils/permissions';
 
 const paginationLabel = (label) =>
     label
@@ -92,6 +93,8 @@ const donSubtitle = computed(() =>
         ? `${props.donations.total} donaciones registradas`
         : `${props.donations.total} ${props.donations.total === 1 ? 'donación' : 'donaciones'} · ${donationStatusLabel(filters.status)}`,
 );
+
+const showCreateCta = computed(() => canCreateDonations(usePage().props.auth.user));
 </script>
 
 <template>
@@ -104,7 +107,7 @@ const donSubtitle = computed(() =>
                     <h1 class="donations-index__title">Donaciones</h1>
                     <p class="donations-index__subtitle">{{ donSubtitle }}</p>
                 </div>
-                <Link :href="route('donations.create')" class="btn btn--primary">
+                <Link v-if="showCreateCta" :href="route('donations.create')" class="btn btn--primary">
                     <span class="donations-index__cta-icon">+</span> Nueva donación
                 </Link>
             </div>

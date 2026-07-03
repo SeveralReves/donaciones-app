@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Modal from '@/Components/Modal.vue';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
 import { getDeliveryWhatsAppUrl, getReceiverWhatsAppUrl } from '@/utils/whatsapp';
 import { donationStatusLabel, donationTypeLabel } from '@/utils/labels';
@@ -70,6 +70,14 @@ const advance = () => {
 };
 
 const formatDate = (value) => new Date(value).toLocaleString();
+
+// Espejo de DonationStatusFlow::canTransitionTo() en el backend: un
+// voluntario puede avanzar cualquier estado excepto confirmar la recepción.
+const isVolunteer = computed(() => usePage().props.auth.user.rol === 'voluntario');
+
+const canConfirmReceipt = computed(
+    () => ! (props.nextStatus === 'recibido' && isVolunteer.value),
+);
 
 const canCancel = computed(
     () => ! ['recibido', 'cancelada'].includes(props.donation.status),
@@ -264,7 +272,16 @@ const receiverWhatsAppUrl = computed(() =>
                     </div>
                 </div>
 
-                <div v-if="nextStatus" class="surface">
+                <div v-if="nextStatus && !canConfirmReceipt" class="surface">
+                    <h3 class="donation-detail__heading">Avanzar a "Recibido"</h3>
+                    <p class="donation-detail__receipt-notice">
+                        Confirmar la recepción de esta donación requiere un rol con ese
+                        permiso (admin, médico u odontólogo). Pide a alguien con ese rol que
+                        confirme la recepción.
+                    </p>
+                </div>
+
+                <div v-else-if="nextStatus" class="surface">
                     <h3 class="donation-detail__heading">
                         Avanzar a "{{ donationStatusLabel(nextStatus) }}"
                     </h3>
@@ -511,6 +528,12 @@ const receiverWhatsAppUrl = computed(() =>
 
 .donation-detail__advance {
     margin-top: 1.5rem;
+}
+
+.donation-detail__receipt-notice {
+    margin-top: 0.75rem;
+    font-size: 0.875rem;
+    color: #7a8b84;
 }
 
 .donation-detail__timeline {

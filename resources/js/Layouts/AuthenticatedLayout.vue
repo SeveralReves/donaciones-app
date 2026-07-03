@@ -3,8 +3,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import { useInstallPrompt } from '@/composables/useInstallPrompt';
 import { Link } from '@inertiajs/vue3';
-
-const isAdmin = (user) => user.rol === 'admin';
+import { canCreateDonations, isAdmin } from '@/utils/permissions';
 
 const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
 </script>
@@ -81,7 +80,11 @@ const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
                         En iPhone: toca compartir y luego "Agregar a pantalla de inicio"
                     </span>
 
-                    <Link :href="route('donations.create')" class="app-header__cta">
+                    <Link
+                        v-if="canCreateDonations($page.props.auth.user)"
+                        :href="route('donations.create')"
+                        class="app-header__cta"
+                    >
                         <span class="app-header__cta-icon">+</span>
                         <span class="app-header__cta-label">Nueva donación</span>
                     </Link>
@@ -146,7 +149,11 @@ const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
                     Donaciones
                 </span>
             </Link>
-            <Link :href="route('donations.create')" class="bottom-nav__item">
+            <Link
+                v-if="canCreateDonations($page.props.auth.user)"
+                :href="route('donations.create')"
+                class="bottom-nav__item"
+            >
                 <span
                     class="bottom-nav__dot"
                     :class="{ 'bottom-nav__dot--active': route().current('donations.create') }"

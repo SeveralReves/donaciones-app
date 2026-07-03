@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Donation;
+use App\Models\User;
 
 /**
  * Única fuente de verdad para la secuencia de estados de una donación y los
@@ -49,6 +50,18 @@ class DonationStatusFlow
     public static function canCancel(string $currentStatus): bool
     {
         return ! in_array($currentStatus, ['recibido', self::CANCELLED], true);
+    }
+
+    /**
+     * Los voluntarios pueden ejecutar cualquier transición de la secuencia
+     * excepto la que confirma que una donación fue recibida — ese último
+     * paso requiere un rol con más responsabilidad (admin, médico u
+     * odontólogo). No afecta a la cancelación, que sigue sus propias reglas
+     * en canCancel().
+     */
+    public static function canTransitionTo(User $user, string $toStatus): bool
+    {
+        return ! ($toStatus === 'recibido' && $user->rol === 'voluntario');
     }
 
     /**
