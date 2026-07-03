@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreDonationRequest;
 use App\Http\Requests\UpdateDonationStatusRequest;
 use App\Models\Donation;
+use App\Models\DonationType;
 use App\Models\MedicalReceiver;
 use App\Models\StockItem;
 use App\Services\DonationStatusFlow;
@@ -52,10 +53,14 @@ class DonationController extends Controller
         Gate::authorize('create-donations');
 
         return Inertia::render('Donations/Create', [
+            'donationTypes' => DonationType::query()
+                ->where('active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug', 'requires_doctor_data']),
             'stockItems' => StockItem::query()
                 ->where('active', true)
                 ->orderBy('name')
-                ->get(['id', 'name', 'unit', 'donation_type', 'quantity_available']),
+                ->get(['id', 'name', 'unit', 'donation_type_id', 'quantity_available']),
         ]);
     }
 
@@ -64,6 +69,13 @@ class DonationController extends Controller
         $validated = $request->validated();
         $items = $validated['items'];
         unset($validated['items']);
+
+        // donation_type (texto) todavía es NOT NULL y varias pantallas sin
+        // migrar (dashboard, filtros, /necesidades) siguen leyéndola; se
+        // deriva del tipo elegido en vez de pedírsela al cliente. Se elimina
+        // en un paso posterior, una vez que esas pantallas también migren a
+        // donation_type_id.
+        $validated['donation_type'] = DonationType::findOrFail($validated['donation_type_id'])->slug;
 
         DB::transaction(function () use ($validated, $items, $request): void {
             $donation = Donation::create([

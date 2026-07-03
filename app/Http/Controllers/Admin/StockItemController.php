@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreDonationRequest;
+use App\Models\DonationType;
 use App\Models\StockItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -15,14 +16,6 @@ use Inertia\Response;
 
 class StockItemController extends Controller
 {
-    /**
-     * Mismos valores que donations.donation_type (StoreDonationRequest usa
-     * la misma lista inline para las donaciones).
-     *
-     * @var list<string>
-     */
-    private const DONATION_TYPES = ['insumos_medicos', 'higiene', 'alimentos', 'otros'];
-
     public function index(Request $request): Response
     {
         $filters = $request->only(['donation_type']);
@@ -40,7 +33,12 @@ class StockItemController extends Controller
 
     public function create(): Response
     {
-        return Inertia::render('Admin/Stock/Create');
+        return Inertia::render('Admin/Stock/Create', [
+            'donationTypes' => DonationType::query()
+                ->where('active', true)
+                ->orderBy('name')
+                ->get(['id', 'name', 'slug']),
+        ]);
     }
 
     public function store(Request $request): RedirectResponse
@@ -48,10 +46,16 @@ class StockItemController extends Controller
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'unit' => ['required', Rule::in(StoreDonationRequest::ITEM_UNITS)],
-            'donation_type' => ['required', Rule::in(self::DONATION_TYPES)],
+            'donation_type_id' => ['required', 'string', Rule::exists('donation_types', 'id')->where('active', true)],
             'quantity_available' => ['nullable', 'numeric', 'min:0'],
             'minimum_threshold' => ['nullable', 'numeric', 'min:0'],
         ]);
+
+        // donation_type (texto) todavía es NOT NULL y otras pantallas sin
+        // migrar (filtros del listado, /necesidades) siguen leyéndola; se
+        // deriva del tipo elegido en vez de pedírsela al cliente. Se elimina
+        // en un paso posterior.
+        $validated['donation_type'] = DonationType::findOrFail($validated['donation_type_id'])->slug;
 
         StockItem::create([
             ...$validated,

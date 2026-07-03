@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class StockItem extends Model
@@ -15,6 +16,7 @@ class StockItem extends Model
         'name',
         'unit',
         'donation_type',
+        'donation_type_id',
         'quantity_available',
         'minimum_threshold',
         'active',
@@ -37,6 +39,11 @@ class StockItem extends Model
     public function donationItems(): HasMany
     {
         return $this->hasMany(DonationItem::class);
+    }
+
+    public function donationType(): BelongsTo
+    {
+        return $this->belongsTo(DonationType::class);
     }
 
     /**

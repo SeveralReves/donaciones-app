@@ -2,19 +2,19 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 
-const donationTypes = [
-    { value: 'insumos_medicos', label: 'Insumos médicos' },
-    { value: 'higiene', label: 'Higiene' },
-    { value: 'alimentos', label: 'Alimentos' },
-    { value: 'otros', label: 'Otros' },
-];
+const props = defineProps({
+    donationTypes: {
+        type: Array,
+        default: () => [],
+    },
+});
 
 const itemUnits = ['unidades', 'cajas', 'kg', 'litros', 'paquetes', 'frascos'];
 
 const form = useForm({
     name: '',
     unit: '',
-    donation_type: 'insumos_medicos',
+    donation_type_id: props.donationTypes[0]?.id ?? '',
     quantity_available: '',
     minimum_threshold: '',
 });
@@ -55,14 +55,14 @@ const submit = () => {
                     </div>
 
                     <div class="form-field">
-                        <label for="donation_type" class="form-field__label">Tipo de donación</label>
-                        <select id="donation_type" v-model="form.donation_type" class="form-field__select" required>
-                            <option v-for="type in donationTypes" :key="type.value" :value="type.value">
-                                {{ type.label }}
+                        <label for="donation_type_id" class="form-field__label">Tipo de donación</label>
+                        <select id="donation_type_id" v-model="form.donation_type_id" class="form-field__select" required>
+                            <option v-for="type in donationTypes" :key="type.id" :value="type.id">
+                                {{ type.name }}
                             </option>
                         </select>
-                        <p v-if="form.errors.donation_type" class="form-field__error">
-                            {{ form.errors.donation_type }}
+                        <p v-if="form.errors.donation_type_id" class="form-field__error">
+                            {{ form.errors.donation_type_id }}
                         </p>
                     </div>
 

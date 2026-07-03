@@ -4,25 +4,22 @@ import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 const props = defineProps({
+    donationTypes: {
+        type: Array,
+        default: () => [],
+    },
     stockItems: {
         type: Array,
         default: () => [],
     },
 });
 
-const donationTypes = [
-    { value: 'insumos_medicos', label: 'Insumos médicos' },
-    { value: 'higiene', label: 'Higiene' },
-    { value: 'alimentos', label: 'Alimentos' },
-    { value: 'otros', label: 'Otros' },
-];
-
 const itemUnits = ['unidades', 'cajas', 'kg', 'litros', 'paquetes', 'frascos'];
 
 const blankItem = () => ({ stock_item_id: '', name: '', quantity: '', unit: '' });
 
 const form = useForm({
-    donation_type: 'insumos_medicos',
+    donation_type_id: props.donationTypes[0]?.id ?? '',
     location: '',
     patient_name: '',
     receiving_doctor_name: '',
@@ -33,21 +30,26 @@ const form = useForm({
     items: [blankItem()],
 });
 
-const requiresDoctor = computed(
-    () => form.donation_type === 'insumos_medicos',
+const selectedDonationType = computed(() =>
+    props.donationTypes.find((type) => type.id === form.donation_type_id),
 );
+
+// Única fuente de verdad: si el tipo elegido requiere datos de médico, viene
+// de donation_types.requires_doctor_data (vía el backend), nunca de comparar
+// el nombre o slug del tipo a mano.
+const requiresDoctor = computed(() => selectedDonationType.value?.requires_doctor_data ?? false);
 
 // Catálogo filtrado al tipo de donación elegido: cada tipo tiene su propia
 // lista de insumos, así que no tiene sentido ofrecer "Guantes de nitrilo" al
 // donar alimentos.
 const availableStockItems = computed(() =>
-    props.stockItems.filter((stockItem) => stockItem.donation_type === form.donation_type),
+    props.stockItems.filter((stockItem) => stockItem.donation_type_id === form.donation_type_id),
 );
 
 const stockItemById = (id) => props.stockItems.find((stockItem) => stockItem.id === id);
 
-const selectDonationType = (type) => {
-    form.donation_type = type;
+const selectDonationType = (donationTypeId) => {
+    form.donation_type_id = donationTypeId;
     // Los insumos elegidos son del catálogo de otro tipo; en vez de dejar
     // selecciones inválidas que solo se notarían al enviar, se reinicia.
     form.items = [blankItem()];
@@ -98,17 +100,17 @@ const submit = () => {
                     <div class="donation-form__chips">
                         <button
                             v-for="type in donationTypes"
-                            :key="type.value"
+                            :key="type.id"
                             type="button"
                             class="chip"
-                            :class="{ 'chip--active': form.donation_type === type.value }"
-                            @click="selectDonationType(type.value)"
+                            :class="{ 'chip--active': form.donation_type_id === type.id }"
+                            @click="selectDonationType(type.id)"
                         >
-                            {{ type.label }}
+                            {{ type.name }}
                         </button>
                     </div>
-                    <p v-if="form.errors.donation_type" class="form-field__error donation-form__chips-error">
-                        {{ form.errors.donation_type }}
+                    <p v-if="form.errors.donation_type_id" class="form-field__error donation-form__chips-error">
+                        {{ form.errors.donation_type_id }}
                     </p>
 
                     <div class="donation-form__grid">
@@ -149,7 +151,7 @@ const submit = () => {
                         <div class="donation-form__medical-header">
                             <span v-if="requiresDoctor" class="donation-form__medical-icon">!</span>
                             Médico / responsable que recibe
-                            <span v-if="requiresDoctor">· obligatorio para insumos médicos</span>
+                            <span v-if="requiresDoctor">· obligatorio para {{ selectedDonationType?.name }}</span>
                         </div>
                         <div class="donation-form__grid donation-form__grid--tight">
                             <div class="form-field donation-form__field">

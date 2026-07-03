@@ -17,6 +17,7 @@ class Donation extends Model
     protected $fillable = [
         'patient_name',
         'donation_type',
+        'donation_type_id',
         'location',
         'receiving_doctor_name',
         'receiving_doctor_code',
@@ -44,5 +45,24 @@ class Donation extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function donationType(): BelongsTo
+    {
+        return $this->belongsTo(DonationType::class);
+    }
+
+    /**
+     * Única fuente de verdad para "¿este tipo de donación requiere datos de
+     * médico?" — antes se comparaba donation_type === 'insumos_medicos' a
+     * mano en varios archivos; ahora todos consultan esto, que lee
+     * donation_types.requires_doctor_data vía la relación. Funciona incluso
+     * con una instancia sin guardar (p. ej. `new Donation(['donation_type_id' => $id])`),
+     * ya que belongsTo resuelve por el valor de la FK, no por si el modelo
+     * está persistido.
+     */
+    public function requiresDoctorData(): bool
+    {
+        return (bool) $this->donationType?->requires_doctor_data;
     }
 }

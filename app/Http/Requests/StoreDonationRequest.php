@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Donation;
 use App\Models\StockItem;
 use Illuminate\Contracts\Validation\ValidationRule;
 use Illuminate\Foundation\Http\FormRequest;
@@ -68,10 +69,15 @@ class StoreDonationRequest extends FormRequest
      */
     public function rules(): array
     {
-        $requiresDoctor = $this->input('donation_type') === 'insumos_medicos';
+        // Instancia sin guardar solo para consultar la relación por el id
+        // entrante — Donation::requiresDoctorData() es la única fuente de
+        // verdad, ni aquí ni en DonationStatusFlow se vuelve a comparar el
+        // slug a mano.
+        $requiresDoctor = (new Donation(['donation_type_id' => $this->input('donation_type_id')]))
+            ->requiresDoctorData();
 
         return [
-            'donation_type' => ['required', Rule::in(['insumos_medicos', 'higiene', 'alimentos', 'otros'])],
+            'donation_type_id' => ['required', 'string', Rule::exists('donation_types', 'id')->where('active', true)],
             'location' => ['required', 'string', 'max:255'],
 
             'items' => ['required', 'array', 'min:1'],
@@ -99,8 +105,8 @@ class StoreDonationRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'receiving_doctor_code.required' => 'El código del médico es obligatorio cuando la donación es de insumos médicos.',
-            'receiving_service.required' => 'El servicio del médico es obligatorio cuando la donación es de insumos médicos.',
+            'receiving_doctor_code.required' => 'El código del médico es obligatorio para este tipo de donación.',
+            'receiving_service.required' => 'El servicio del médico es obligatorio para este tipo de donación.',
             'items.*.unit.in' => 'La unidad debe ser una de: '.implode(', ', self::ITEM_UNITS).'.',
         ];
     }
@@ -120,7 +126,7 @@ class StoreDonationRequest extends FormRequest
                 return;
             }
 
-            $donationType = $this->input('donation_type');
+            $donationTypeId = $this->input('donation_type_id');
             $requestedByStockItem = [];
 
             foreach ($items as $index => $item) {
@@ -144,7 +150,7 @@ class StoreDonationRequest extends FormRequest
                     continue; // ya lo rechaza la regla exists de items.*.stock_item_id
                 }
 
-                if ($stockItem->donation_type !== $donationType) {
+                if ($stockItem->donation_type_id !== $donationTypeId) {
                     $validator->errors()->add(
                         "items.$index.stock_item_id",
                         "\"{$stockItem->name}\" no pertenece al tipo de donación seleccionado.",

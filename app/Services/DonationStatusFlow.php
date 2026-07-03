@@ -81,8 +81,9 @@ class DonationStatusFlow
 
     /**
      * Campos que deben tener valor en la donación para poder avanzar a
-     * $toStatus. Depende del estado de la donación (p. ej. donation_type)
-     * para las reglas condicionales.
+     * $toStatus. Depende de si el tipo de donación requiere datos de médico
+     * (Donation::requiresDoctorData(), respaldado por
+     * donation_types.requires_doctor_data) para las reglas condicionales.
      *
      * @return list<string>
      */
@@ -91,7 +92,7 @@ class DonationStatusFlow
         return match ($toStatus) {
             'en_proceso' => [
                 'receiving_doctor_name',
-                ...($donation->donation_type === 'insumos_medicos'
+                ...($donation->requiresDoctorData()
                     ? ['receiving_doctor_code', 'receiving_service']
                     : []),
             ],
