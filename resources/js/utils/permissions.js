@@ -3,8 +3,10 @@
 // el backend (Gate::authorize() / can: middleware); esto es puramente para
 // no ofrecer acciones que el servidor va a rechazar de todas formas.
 
+// Espejo de User::isAdminOrAbove() en el backend: super_admin tiene todo el
+// acceso de un admin normal.
 export function isAdmin(user) {
-    return user.rol === 'admin';
+    return user.rol === 'admin' || user.rol === 'super_admin';
 }
 
 /**

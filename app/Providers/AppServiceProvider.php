@@ -24,7 +24,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        Gate::define('manage-users', fn (User $user): bool => $user->rol === 'admin' || $user->isSuperAdmin());
+        Gate::define('manage-users', fn (User $user): bool => $user->isAdminOrAbove());
 
         // Un super_admin es intocable desde la interfaz: nadie —ni otro
         // super_admin, ni él mismo— puede editar sus datos, cambiarle el
@@ -37,13 +37,13 @@ class AppServiceProvider extends ServiceProvider
                 return false;
             }
 
-            return $actor->rol === 'admin' || $actor->isSuperAdmin();
+            return $actor->isAdminOrAbove();
         });
 
         // Separado de 'manage-users' aunque hoy ambos exigen lo mismo: el
         // inventario es un dominio distinto al de usuarios y podría abrirse
         // a un rol propio (p. ej. bodega) sin tocar el permiso de usuarios.
-        Gate::define('manage-stock', fn (User $user): bool => $user->rol === 'admin');
+        Gate::define('manage-stock', fn (User $user): bool => $user->isAdminOrAbove());
 
         // Voluntarios pueden ver y avanzar donaciones, pero no registrar
         // donaciones nuevas — eso requiere reunir datos completos (médico,

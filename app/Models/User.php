@@ -41,4 +41,17 @@ class User extends Authenticatable
     {
         return $this->rol === 'super_admin';
     }
+
+    /**
+     * super_admin tiene todo el acceso de un admin normal, más su propia
+     * protección especial (ver Gate 'modify-user'). Centraliza el "admin O
+     * super_admin" para que las Gates que dan acceso a secciones enteras
+     * (manage-users, manage-stock) no repitan la comparación — si alguna
+     * vuelve a comparar 'admin' a mano y se olvida de super_admin, ese es
+     * justo el bug que este helper evita.
+     */
+    public function isAdminOrAbove(): bool
+    {
+        return $this->rol === 'admin' || $this->isSuperAdmin();
+    }
 }
