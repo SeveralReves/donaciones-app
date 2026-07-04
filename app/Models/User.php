@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'rol', 'codigo_medico', 'servicio'])]
+#[Fillable(['name', 'email', 'password', 'rol', 'active', 'codigo_medico', 'servicio'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -27,6 +27,18 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'active' => 'boolean',
         ];
+    }
+
+    /**
+     * 'super_admin' no es un rol asignable desde la interfaz (se asigna una
+     * sola vez a mano, por tinker) — este helper centraliza la comparación
+     * del string en un solo lugar para que las Gates de app/Providers/
+     * AppServiceProvider.php no lo repitan.
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->rol === 'super_admin';
     }
 }

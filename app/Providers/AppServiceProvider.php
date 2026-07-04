@@ -24,7 +24,21 @@ class AppServiceProvider extends ServiceProvider
     {
         Vite::prefetch(concurrency: 3);
 
-        Gate::define('manage-users', fn (User $user): bool => $user->rol === 'admin');
+        Gate::define('manage-users', fn (User $user): bool => $user->rol === 'admin' || $user->isSuperAdmin());
+
+        // Un super_admin es intocable desde la interfaz: nadie —ni otro
+        // super_admin, ni él mismo— puede editar sus datos, cambiarle el
+        // rol, resetearle la contraseña ni desactivarlo. Esa condición se
+        // evalúa primero y por el rol ACTUAL del objetivo, sin importar
+        // quién sea el actor. Fuera de eso, un super_admin puede administrar
+        // usuarios exactamente igual que un admin normal.
+        Gate::define('modify-user', function (User $actor, User $target): bool {
+            if ($target->isSuperAdmin()) {
+                return false;
+            }
+
+            return $actor->rol === 'admin' || $actor->isSuperAdmin();
+        });
 
         // Separado de 'manage-users' aunque hoy ambos exigen lo mismo: el
         // inventario es un dominio distinto al de usuarios y podría abrirse

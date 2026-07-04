@@ -29,6 +29,7 @@ export const USER_ROLE_LABELS = {
     medico: 'Médico',
     odontologo: 'Odontólogo',
     voluntario: 'Voluntario',
+    super_admin: 'Super admin',
 };
 
 export function userRoleLabel(rol) {

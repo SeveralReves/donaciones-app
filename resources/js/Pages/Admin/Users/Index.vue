@@ -1,6 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { userRoleLabel } from '@/utils/labels';
 
@@ -10,6 +10,9 @@ const props = defineProps({
         required: true,
     },
 });
+
+// No cambia durante la vida del componente, no hace falta que sea reactivo.
+const currentUserId = usePage().props.auth.user.id;
 
 const search = ref('');
 
@@ -28,6 +31,10 @@ const filteredUsers = computed(() => {
 const initial = (name) => name.trim().charAt(0).toUpperCase();
 
 const roleBadgeClass = (rol) => {
+    if (rol === 'super_admin') {
+        return 'users-index__role--super-admin';
+    }
+
     if (rol === 'admin') {
         return 'users-index__role--admin';
     }
@@ -37,6 +44,16 @@ const roleBadgeClass = (rol) => {
     }
 
     return 'users-index__role--medical';
+};
+
+const toggleActive = (user) => {
+    const verb = user.active ? 'Desactivar' : 'Activar';
+
+    if (! confirm(`¿${verb} a ${user.name}?`)) {
+        return;
+    }
+
+    router.patch(route('admin.users.toggle-active', user.id), {}, { preserveScroll: true });
 };
 </script>
 
@@ -75,11 +92,16 @@ const roleBadgeClass = (rol) => {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="user in filteredUsers" :key="user.id">
+                        <tr
+                            v-for="user in filteredUsers"
+                            :key="user.id"
+                            :class="{ 'users-index__row--inactive': !user.active }"
+                        >
                             <td>
                                 <div class="users-index__name">
                                     <span class="avatar">{{ initial(user.name) }}</span>
                                     <span class="users-index__name-text">{{ user.name }}</span>
+                                    <span v-if="!user.active" class="users-index__inactive-tag">Inactivo</span>
                                 </div>
                             </td>
                             <td class="users-index__col--md users-index__email">
@@ -100,9 +122,23 @@ const roleBadgeClass = (rol) => {
                                 {{ user.servicio ?? '—' }}
                             </td>
                             <td class="users-index__actions">
-                                <Link :href="route('admin.users.edit', user.id)" class="users-index__edit">
-                                    Editar
-                                </Link>
+                                <span v-if="user.rol === 'super_admin'" class="users-index__protected">
+                                    Protegido
+                                </span>
+                                <div v-else class="users-index__actions-group">
+                                    <Link :href="route('admin.users.edit', user.id)" class="users-index__edit">
+                                        Editar
+                                    </Link>
+                                    <button
+                                        v-if="user.id !== currentUserId"
+                                        type="button"
+                                        class="users-index__toggle"
+                                        :class="{ 'users-index__toggle--activate': !user.active }"
+                                        @click="toggleActive(user)"
+                                    >
+                                        {{ user.active ? 'Desactivar' : 'Activar' }}
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -196,6 +232,10 @@ const roleBadgeClass = (rol) => {
     border-bottom: none;
 }
 
+.users-index__row--inactive {
+    opacity: 0.55;
+}
+
 .users-index__col--md {
     display: none;
 }
@@ -212,6 +252,19 @@ const roleBadgeClass = (rol) => {
     text-overflow: ellipsis;
     white-space: nowrap;
     font-weight: 600;
+}
+
+.users-index__inactive-tag {
+    flex: none;
+    display: inline-block;
+    border-radius: 999px;
+    background-color: #f1f4f3;
+    padding: 2px 8px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #8a969a;
 }
 
 .users-index__email {
@@ -245,8 +298,20 @@ const roleBadgeClass = (rol) => {
     color: #6d67b0;
 }
 
+.users-index__role--super-admin {
+    background-color: #14322a;
+    color: #fff;
+}
+
 .users-index__actions {
     text-align: right;
+}
+
+.users-index__actions-group {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 14px;
 }
 
 .users-index__edit {
@@ -256,6 +321,30 @@ const roleBadgeClass = (rol) => {
 
 .users-index__edit:hover {
     text-decoration: underline;
+}
+
+.users-index__toggle {
+    border: none;
+    background: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #d9534f;
+    cursor: pointer;
+}
+
+.users-index__toggle:hover {
+    text-decoration: underline;
+}
+
+.users-index__toggle--activate {
+    color: #148f5b;
+}
+
+.users-index__protected {
+    font-size: 0.8125rem;
+    color: #8a969a;
 }
 
 .users-index__empty {

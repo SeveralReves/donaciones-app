@@ -33,6 +33,8 @@ Route::middleware(['auth', 'can:manage-users'])->prefix('admin')->name('admin.')
     Route::resource('users', AdminUserController::class)->except(['show', 'destroy']);
     Route::post('users/{user}/reset-password', [AdminUserController::class, 'resetPassword'])
         ->name('users.reset-password');
+    Route::patch('users/{user}/toggle-active', [AdminUserController::class, 'toggleActive'])
+        ->name('users.toggle-active');
 });
 
 Route::middleware(['auth', 'can:manage-stock'])->prefix('admin')->name('admin.')->group(function () {

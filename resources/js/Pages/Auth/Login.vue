@@ -1,5 +1,6 @@
 <script setup>
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
+import { computed } from 'vue';
 
 defineProps({
     canResetPassword: {
@@ -15,6 +16,13 @@ const form = useForm({
     password: '',
     remember: false,
 });
+
+// form.errors.email solo se llena cuando ESTE form hace un submit fallido.
+// El middleware EnsureUserIsActive puede mandar a un usuario ya logueado de
+// vuelta a /login con un error flasheado en la sesión (no vino de un submit
+// de este formulario), que Inertia comparte en $page.props.errors — hay que
+// leer de ahí también para que ese caso también se muestre.
+const emailError = computed(() => form.errors.email || usePage().props.errors.email);
 
 const submit = () => {
     form.post(route('login'), {
@@ -57,8 +65,8 @@ const submit = () => {
                         autofocus
                         autocomplete="username"
                     />
-                    <p v-if="form.errors.email" class="form-field__error">
-                        {{ form.errors.email }}
+                    <p v-if="emailError" class="form-field__error">
+                        {{ emailError }}
                     </p>
                 </div>
 
