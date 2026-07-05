@@ -18,6 +18,7 @@ class StockItem extends Model
         'donation_type',
         'donation_type_id',
         'quantity_available',
+        'units_available',
         'minimum_threshold',
         'active',
         'deactivated_by',

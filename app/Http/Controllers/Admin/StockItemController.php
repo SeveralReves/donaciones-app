@@ -139,6 +139,9 @@ class StockItemController extends Controller
         $validated = $request->validate([
             'quantity_change' => ['required', 'numeric', 'not_in:0'],
             'reason' => ['required', 'string', 'max:255'],
+            // Solo aplica si el insumo se mide en cajas; se ignora para
+            // cualquier otra unidad en vez de rechazar el ajuste completo.
+            'units_per_box' => ['nullable', 'integer', 'min:1'],
         ]);
 
         DB::transaction(function () use ($stockItem, $validated, $request): void {
@@ -155,14 +158,31 @@ class StockItemController extends Controller
                 ]);
             }
 
+            $unitsPerBox = $locked->unit === 'cajas' ? ($validated['units_per_box'] ?? null) : null;
+
             $locked->adjustments()->create([
                 'quantity_change' => $validated['quantity_change'],
+                'units_per_box' => $unitsPerBox,
                 'reason' => $validated['reason'],
                 'changed_by' => $request->user()->id,
                 'changed_at' => now(),
             ]);
 
             $locked->increment('quantity_available', $validated['quantity_change']);
+
+            if ($unitsPerBox !== null) {
+                $unitsDelta = (int) round($validated['quantity_change'] * $unitsPerBox);
+
+                // Si units_available todavía es null, este es el primer
+                // movimiento que trae el dato: se inicializa en vez de sumar
+                // sobre null (que daría null de nuevo).
+                if ($locked->units_available === null) {
+                    $locked->units_available = $unitsDelta;
+                    $locked->save();
+                } else {
+                    $locked->increment('units_available', $unitsDelta);
+                }
+            }
         });
 
         return redirect()->route('admin.stock-items.index');

@@ -71,6 +71,17 @@ const advance = () => {
 
 const formatDate = (value) => new Date(value).toLocaleString();
 
+// null si no aplica (unit distinto de 'cajas', o units_per_box sin definir
+// para ese item) — el molde de "cajas sueltas sin desglosar" sigue siendo
+// válido, no todo lo que se dona en cajas trae ese dato.
+const itemBoxTotal = (item) => {
+    if (item.unit !== 'cajas' || item.units_per_box === null || item.units_per_box === undefined) {
+        return null;
+    }
+
+    return Number(item.quantity) * Number(item.units_per_box);
+};
+
 // Espejo de DonationStatusFlow::canTransitionTo() en el backend: un
 // voluntario puede avanzar cualquier estado excepto confirmar la recepción.
 const isVolunteer = computed(() => usePage().props.auth.user.rol === 'voluntario');
@@ -217,7 +228,12 @@ const receiverWhatsAppUrl = computed(() =>
                             <tr v-for="item in donation.items" :key="item.id">
                                 <td>{{ item.name }}</td>
                                 <td>{{ item.quantity }}</td>
-                                <td>{{ item.unit ?? '—' }}</td>
+                                <td>
+                                    {{ item.unit ?? '—' }}
+                                    <span v-if="itemBoxTotal(item) !== null" class="donation-detail__box-total">
+                                        ({{ itemBoxTotal(item) }} unidades)
+                                    </span>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -513,6 +529,11 @@ const receiverWhatsAppUrl = computed(() =>
 
 .donation-detail__table tbody tr:last-child {
     border-bottom: none;
+}
+
+.donation-detail__box-total {
+    font-size: 0.8125rem;
+    color: #8a969a;
 }
 
 .donation-detail__whatsapp {

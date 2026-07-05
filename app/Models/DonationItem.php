@@ -19,6 +19,7 @@ class DonationItem extends Model
         'name',
         'quantity',
         'unit',
+        'units_per_box',
     ];
 
     protected function casts(): array

@@ -41,6 +41,7 @@ const adjustingItem = ref(null);
 const adjustForm = useForm({
     quantity_change: '',
     reason: '',
+    units_per_box: '',
 });
 
 const openAdjustModal = (item) => {
@@ -230,6 +231,9 @@ const deactivationTooltip = (item) => {
                                 :class="{ 'stock-index__quantity--low': isBelowThreshold(item) }"
                             >
                                 {{ item.quantity_available }}
+                                <span v-if="item.units_available !== null" class="stock-index__units-available">
+                                    (≈{{ item.units_available }} unidades)
+                                </span>
                                 <span v-if="isBelowThreshold(item)" class="stock-index__low-badge">
                                     Bajo el mínimo
                                 </span>
@@ -333,6 +337,28 @@ const deactivationTooltip = (item) => {
                         />
                         <p v-if="adjustForm.errors.reason" class="form-field__error">
                             {{ adjustForm.errors.reason }}
+                        </p>
+                    </div>
+
+                    <div v-if="adjustingItem.unit === 'cajas'" class="form-field">
+                        <label for="adjust_units_per_box" class="form-field__label">
+                            Unidades por caja (opcional)
+                        </label>
+                        <input
+                            id="adjust_units_per_box"
+                            v-model="adjustForm.units_per_box"
+                            type="number"
+                            step="1"
+                            min="1"
+                            placeholder="Ej. 100"
+                            class="form-field__input"
+                        />
+                        <p class="stock-adjust-form__hint">
+                            Si lo indicás, se suma o resta del contador acumulado de unidades
+                            individuales de este insumo.
+                        </p>
+                        <p v-if="adjustForm.errors.units_per_box" class="form-field__error">
+                            {{ adjustForm.errors.units_per_box }}
                         </p>
                     </div>
 
@@ -597,6 +623,12 @@ const deactivationTooltip = (item) => {
     font-weight: 700;
     color: #d97706;
     vertical-align: middle;
+}
+
+.stock-index__units-available {
+    margin-left: 0.375rem;
+    font-weight: 400;
+    color: #8a969a;
 }
 
 .stock-index__no-threshold {

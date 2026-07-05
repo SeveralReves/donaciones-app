@@ -85,6 +85,15 @@ class DonationController extends Controller
             ]);
 
             foreach ($items as $item) {
+                // Solo tiene sentido para 'cajas' — cualquier otro valor
+                // entrante se ignora en vez de rechazar la donación completa
+                // por un dato que no aplica a esa fila. Para items del
+                // catálogo esto se vuelve a evaluar abajo con la unidad real
+                // del stock_item, que es la autoritativa.
+                if ($item['unit'] !== 'cajas') {
+                    $item['units_per_box'] = null;
+                }
+
                 if ($item['stock_item_id'] ?? null) {
                     // Bloquea la fila: dos donaciones creándose a la vez no
                     // deben poder leer la misma cantidad disponible y
@@ -103,7 +112,20 @@ class DonationController extends Controller
                     $item['name'] = $stockItem->name;
                     $item['unit'] = $stockItem->unit;
 
+                    if ($item['unit'] !== 'cajas') {
+                        $item['units_per_box'] = null;
+                    }
+
                     $stockItem->decrement('quantity_available', $item['quantity']);
+
+                    // Nunca se "inventa" un total de unidades individuales a
+                    // partir de una donación — si units_available todavía es
+                    // null (nunca se especificó en ningún ajuste de entrada),
+                    // este movimiento no lo toca.
+                    if ($item['units_per_box'] !== null && $stockItem->units_available !== null) {
+                        $unitsDelta = (int) round($item['quantity'] * $item['units_per_box']);
+                        $stockItem->decrement('units_available', $unitsDelta);
+                    }
                 }
 
                 $donation->items()->create($item);

@@ -16,7 +16,7 @@ const props = defineProps({
 
 const itemUnits = ['unidades', 'cajas', 'kg', 'litros', 'paquetes', 'frascos'];
 
-const blankItem = () => ({ stock_item_id: '', name: '', quantity: '', unit: '' });
+const blankItem = () => ({ stock_item_id: '', name: '', quantity: '', unit: '', units_per_box: '' });
 
 const form = useForm({
     donation_type_id: props.donationTypes[0]?.id ?? '',
@@ -78,6 +78,15 @@ const removeItem = (index) => {
 };
 
 const submit = () => {
+    // "Unidades por caja" solo aplica a filas con unit 'cajas' — si el
+    // usuario lo llenó y después cambió la unidad, se limpia antes de
+    // enviar en vez de mandar un dato que ya no corresponde a esa fila.
+    form.items.forEach((item) => {
+        if (item.unit !== 'cajas') {
+            item.units_per_box = '';
+        }
+    });
+
     form.post(route('donations.store'));
 };
 </script>
@@ -338,6 +347,24 @@ const submit = () => {
                                 <p v-if="form.errors[`items.${index}.unit`]" class="form-field__error">
                                     {{ form.errors[`items.${index}.unit`] }}
                                 </p>
+
+                                <template v-if="item.unit === 'cajas'">
+                                    <label :for="`item-units-per-box-${index}`" class="form-field__label donation-form__units-per-box-label">
+                                        Unidades por caja
+                                    </label>
+                                    <input
+                                        :id="`item-units-per-box-${index}`"
+                                        v-model="item.units_per_box"
+                                        type="number"
+                                        step="1"
+                                        min="1"
+                                        placeholder="Ej. 100 (opcional)"
+                                        class="form-field__input"
+                                    />
+                                    <p v-if="form.errors[`items.${index}.units_per_box`]" class="form-field__error">
+                                        {{ form.errors[`items.${index}.units_per_box`] }}
+                                    </p>
+                                </template>
                             </div>
 
                             <div class="donation-form__item-remove">
@@ -534,6 +561,10 @@ const submit = () => {
     margin-top: 0.375rem;
     font-size: 0.75rem;
     color: #8a969a;
+}
+
+.donation-form__units-per-box-label {
+    margin-top: 0.5rem;
 }
 
 .donation-form__item-remove {

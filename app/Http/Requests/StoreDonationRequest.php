@@ -89,6 +89,11 @@ class StoreDonationRequest extends FormRequest
             'items.*.name' => ['nullable', 'string', 'max:255'],
             'items.*.quantity' => ['required', 'numeric', 'gt:0'],
             'items.*.unit' => ['nullable', Rule::in(self::ITEM_UNITS)],
+            // Solo aplica cuando unit es 'cajas'; DonationController lo
+            // ignora (lo deja en null) para cualquier otra unidad en vez de
+            // rechazar la petición — es más simple que agregar una regla
+            // condicional y el resultado en base de datos es el mismo.
+            'items.*.units_per_box' => ['nullable', 'integer', 'min:1'],
 
             'patient_name' => ['nullable', 'string', 'max:255'],
             'receiving_doctor_name' => ['nullable', 'string', 'max:255'],
