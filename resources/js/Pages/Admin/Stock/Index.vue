@@ -1,9 +1,11 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ConfirmModal from '@/Components/ConfirmModal.vue';
 import Modal from '@/Components/Modal.vue';
-import { Head, Link, router, useForm } from '@inertiajs/vue3';
-import { reactive, ref } from 'vue';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
+import { computed, reactive, ref } from 'vue';
 import { donationTypeLabel } from '@/utils/labels';
+import { isAdmin } from '@/utils/permissions';
 
 const props = defineProps({
     stockItems: {
@@ -15,6 +17,11 @@ const props = defineProps({
         default: () => ({}),
     },
 });
+
+// Espejo de la Gate 'manage-stock': un voluntario solo puede ver el listado
+// y el historial (ya lo permite la Gate 'view-stock' en las rutas), nunca
+// crear ni modificar insumos.
+const canManageStock = isAdmin(usePage().props.auth.user);
 
 const donationTypes = ['insumos_medicos', 'medicinas', 'higiene', 'alimentos', 'miscelaneos', 'otros'];
 
@@ -79,6 +86,73 @@ const submitThreshold = () => {
         onSuccess: () => closeThresholdModal(),
     });
 };
+
+const deactivatingItem = ref(null);
+
+const deactivateForm = useForm({
+    reason: '',
+});
+
+const openDeactivateModal = (item) => {
+    deactivatingItem.value = item;
+    deactivateForm.reset();
+    deactivateForm.clearErrors();
+};
+
+const closeDeactivateModal = () => {
+    deactivatingItem.value = null;
+};
+
+const submitDeactivate = () => {
+    deactivateForm.patch(route('admin.stock-items.deactivate', deactivatingItem.value.id), {
+        preserveScroll: true,
+        onSuccess: () => closeDeactivateModal(),
+    });
+};
+
+const reactivatingItem = ref(null);
+const reactivating = ref(false);
+
+const askReactivate = (item) => {
+    reactivatingItem.value = item;
+};
+
+const cancelReactivate = () => {
+    reactivatingItem.value = null;
+};
+
+const confirmReactivate = () => {
+    reactivating.value = true;
+
+    router.patch(
+        route('admin.stock-items.reactivate', reactivatingItem.value.id),
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                reactivating.value = false;
+                reactivatingItem.value = null;
+            },
+        },
+    );
+};
+
+const reactivateMessage = computed(() =>
+    reactivatingItem.value
+        ? `¿Reactivar "${reactivatingItem.value.name}"? Volverá a ofrecerse en donaciones y necesidades.`
+        : '',
+);
+
+const deactivationTooltip = (item) => {
+    if (! item.deactivated_at) {
+        return '';
+    }
+
+    const date = new Date(item.deactivated_at).toLocaleString();
+    const who = item.deactivated_by?.name ?? '—';
+
+    return `Desactivado por ${who} el ${date}. Motivo: ${item.deactivation_reason ?? '—'}`;
+};
 </script>
 
 <template>
@@ -91,7 +165,11 @@ const submitThreshold = () => {
                     <h1 class="stock-index__title">Inventario</h1>
                     <p class="stock-index__subtitle">Catálogo de insumos y cantidad disponible</p>
                 </div>
-                <Link :href="route('admin.stock-items.create')" class="btn btn--primary">
+                <Link
+                    v-if="canManageStock"
+                    :href="route('admin.stock-items.create')"
+                    class="btn btn--primary"
+                >
                     <span class="stock-index__cta-icon">+</span> Nuevo insumo
                 </Link>
             </div>
@@ -128,9 +206,21 @@ const submitThreshold = () => {
                         <tr
                             v-for="item in stockItems"
                             :key="item.id"
-                            :class="{ 'stock-index__row--low': isBelowThreshold(item) }"
+                            :class="{
+                                'stock-index__row--low': isBelowThreshold(item),
+                                'stock-index__row--inactive': !item.active,
+                            }"
                         >
-                            <td class="stock-index__name">{{ item.name }}</td>
+                            <td class="stock-index__name">
+                                {{ item.name }}
+                                <span
+                                    v-if="!item.active"
+                                    class="stock-index__inactive-tag"
+                                    :title="deactivationTooltip(item)"
+                                >
+                                    Inactivo
+                                </span>
+                            </td>
                             <td>{{ item.unit }}</td>
                             <td class="stock-index__col--md">
                                 {{ donationTypeLabel(item.donation_type) }}
@@ -150,6 +240,7 @@ const submitThreshold = () => {
                                 </span>
                                 <span v-else class="stock-index__no-threshold">Sin definir</span>
                                 <button
+                                    v-if="canManageStock"
                                     type="button"
                                     class="stock-index__threshold-edit"
                                     @click="openThresholdModal(item)"
@@ -159,6 +250,7 @@ const submitThreshold = () => {
                             </td>
                             <td class="stock-index__actions">
                                 <button
+                                    v-if="canManageStock"
                                     type="button"
                                     class="btn btn--secondary stock-index__adjust-btn"
                                     @click="openAdjustModal(item)"
@@ -171,6 +263,24 @@ const submitThreshold = () => {
                                 >
                                     Historial
                                 </Link>
+                                <template v-if="canManageStock">
+                                    <button
+                                        v-if="item.active"
+                                        type="button"
+                                        class="stock-index__deactivate-btn"
+                                        @click="openDeactivateModal(item)"
+                                    >
+                                        Desactivar
+                                    </button>
+                                    <button
+                                        v-else
+                                        type="button"
+                                        class="stock-index__reactivate-btn"
+                                        @click="askReactivate(item)"
+                                    >
+                                        Reactivar
+                                    </button>
+                                </template>
                             </td>
                         </tr>
                     </tbody>
@@ -290,6 +400,57 @@ const submitThreshold = () => {
                 </form>
             </div>
         </Modal>
+
+        <Modal :show="deactivatingItem !== null" @close="closeDeactivateModal">
+            <div class="modal__content" v-if="deactivatingItem">
+                <h2 class="form-section__title">Desactivar — {{ deactivatingItem.name }}</h2>
+                <p class="form-section__description">
+                    Deja de ofrecerse en donaciones nuevas y en la página de necesidades, pero
+                    sigue visible en el historial de donaciones que ya lo usaron.
+                </p>
+
+                <form @submit.prevent="submitDeactivate" class="stock-adjust-form">
+                    <div class="form-field">
+                        <label for="deactivation_reason" class="form-field__label">Motivo</label>
+                        <input
+                            id="deactivation_reason"
+                            v-model="deactivateForm.reason"
+                            type="text"
+                            placeholder="Ej. descontinuado por el proveedor, vencido"
+                            class="form-field__input"
+                            required
+                        />
+                        <p v-if="deactivateForm.errors.reason" class="form-field__error">
+                            {{ deactivateForm.errors.reason }}
+                        </p>
+                    </div>
+
+                    <div class="stock-adjust-form__actions">
+                        <button type="button" class="btn btn--secondary" @click="closeDeactivateModal">
+                            Cancelar
+                        </button>
+                        <button
+                            type="submit"
+                            class="btn btn--danger"
+                            :class="{ 'is-busy': deactivateForm.processing }"
+                            :disabled="deactivateForm.processing"
+                        >
+                            Desactivar insumo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </Modal>
+
+        <ConfirmModal
+            :show="reactivatingItem !== null"
+            title="Reactivar insumo"
+            :message="reactivateMessage"
+            confirm-label="Reactivar"
+            :processing="reactivating"
+            @confirm="confirmReactivate"
+            @cancel="cancelReactivate"
+        />
     </AuthenticatedLayout>
 </template>
 
@@ -383,12 +544,30 @@ const submitThreshold = () => {
     border-bottom: none;
 }
 
+.stock-index__row--inactive {
+    opacity: 0.55;
+}
+
 .stock-index__col--md {
     display: none;
 }
 
 .stock-index__name {
     font-weight: 600;
+}
+
+.stock-index__inactive-tag {
+    margin-left: 8px;
+    display: inline-block;
+    border-radius: 999px;
+    background-color: #f1f4f3;
+    padding: 2px 8px;
+    font-size: 0.6875rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: #8a969a;
+    cursor: help;
 }
 
 .stock-index__quantity {
@@ -462,6 +641,30 @@ const submitThreshold = () => {
 }
 
 .stock-index__history-link:hover {
+    text-decoration: underline;
+}
+
+.stock-index__deactivate-btn,
+.stock-index__reactivate-btn {
+    border: none;
+    background: none;
+    padding: 0;
+    font-family: inherit;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.stock-index__deactivate-btn {
+    color: #d9534f;
+}
+
+.stock-index__reactivate-btn {
+    color: #148f5b;
+}
+
+.stock-index__deactivate-btn:hover,
+.stock-index__reactivate-btn:hover {
     text-decoration: underline;
 }
 

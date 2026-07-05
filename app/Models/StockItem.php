@@ -20,6 +20,9 @@ class StockItem extends Model
         'quantity_available',
         'minimum_threshold',
         'active',
+        'deactivated_by',
+        'deactivated_at',
+        'deactivation_reason',
     ];
 
     protected function casts(): array
@@ -28,6 +31,7 @@ class StockItem extends Model
             'quantity_available' => 'decimal:2',
             'minimum_threshold' => 'decimal:2',
             'active' => 'boolean',
+            'deactivated_at' => 'datetime',
         ];
     }
 
@@ -44,6 +48,11 @@ class StockItem extends Model
     public function donationType(): BelongsTo
     {
         return $this->belongsTo(DonationType::class);
+    }
+
+    public function deactivatedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'deactivated_by');
     }
 
     /**

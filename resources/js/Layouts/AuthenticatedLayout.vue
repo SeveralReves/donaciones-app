@@ -3,7 +3,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import { useInstallPrompt } from '@/composables/useInstallPrompt';
 import { Link } from '@inertiajs/vue3';
-import { canCreateDonations, isAdmin } from '@/utils/permissions';
+import { canCreateDonations, canViewStock, isAdmin } from '@/utils/permissions';
 
 const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
 </script>
@@ -49,7 +49,7 @@ const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
                             Usuarios
                         </Link>
                         <Link
-                            v-if="isAdmin($page.props.auth.user)"
+                            v-if="canViewStock($page.props.auth.user)"
                             :href="route('admin.stock-items.index')"
                             class="app-header__nav-link"
                             :class="{ 'app-header__nav-link--active': route().current('admin.stock-items.*') }"
@@ -182,7 +182,7 @@ const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
                 </span>
             </Link>
             <Link
-                v-if="isAdmin($page.props.auth.user)"
+                v-if="canViewStock($page.props.auth.user)"
                 :href="route('admin.stock-items.index')"
                 class="bottom-nav__item"
             >

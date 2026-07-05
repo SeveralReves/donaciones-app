@@ -16,3 +16,12 @@ export function isAdmin(user) {
 export function canCreateDonations(user) {
     return user.rol !== 'voluntario';
 }
+
+/**
+ * Espejo de la Gate 'view-stock': quien ya puede administrar el inventario
+ * (isAdmin) más un voluntario, que solo puede verlo — nunca crear ni
+ * modificar insumos (eso sigue siendo isAdmin-only, ver manage-stock).
+ */
+export function canViewStock(user) {
+    return isAdmin(user) || user.rol === 'voluntario';
+}

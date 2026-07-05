@@ -22,6 +22,7 @@ class StockItemController extends Controller
 
         $stockItems = StockItem::query()
             ->when($filters['donation_type'] ?? null, fn ($query, $type) => $query->where('donation_type', $type))
+            ->with('deactivatedBy:id,name')
             ->orderBy('name')
             ->get();
 
@@ -77,6 +78,40 @@ class StockItemController extends Controller
         ]);
 
         $stockItem->update($validated);
+
+        return redirect()->route('admin.stock-items.index');
+    }
+
+    /**
+     * No es un borrado real: solo apaga 'active' y deja registro de quién,
+     * cuándo y por qué. El catálogo de donaciones y /necesidades ya filtran
+     * por active=true, así que un insumo desactivado deja de ofrecerse ahí
+     * sin necesidad de tocar esas pantallas.
+     */
+    public function deactivate(Request $request, StockItem $stockItem): RedirectResponse
+    {
+        $validated = $request->validate([
+            'reason' => ['required', 'string', 'max:255'],
+        ]);
+
+        $stockItem->update([
+            'active' => false,
+            'deactivated_by' => $request->user()->id,
+            'deactivated_at' => now(),
+            'deactivation_reason' => $validated['reason'],
+        ]);
+
+        return redirect()->route('admin.stock-items.index');
+    }
+
+    /**
+     * deactivated_by/deactivated_at/deactivation_reason no se limpian a
+     * propósito: quedan como el registro de la última desactivación hasta
+     * que se sobrescriban la próxima vez que alguien desactive este insumo.
+     */
+    public function reactivate(StockItem $stockItem): RedirectResponse
+    {
+        $stockItem->update(['active' => true]);
 
         return redirect()->route('admin.stock-items.index');
     }

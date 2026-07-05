@@ -45,6 +45,12 @@ class AppServiceProvider extends ServiceProvider
         // a un rol propio (p. ej. bodega) sin tocar el permiso de usuarios.
         Gate::define('manage-stock', fn (User $user): bool => $user->isAdminOrAbove());
 
+        // Acceso de solo lectura al inventario: además de quien ya puede
+        // administrarlo (manage-stock), un voluntario puede ver el listado
+        // y el historial de ajustes, pero no crear insumos ni modificarlos
+        // (eso lo sigue exigiendo manage-stock en cada endpoint de escritura).
+        Gate::define('view-stock', fn (User $user): bool => $user->isAdminOrAbove() || $user->rol === 'voluntario');
+
         // Voluntarios pueden ver y avanzar donaciones, pero no registrar
         // donaciones nuevas — eso requiere reunir datos completos (médico,
         // insumos, etc.) que se espera maneje personal con más contexto.

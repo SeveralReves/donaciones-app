@@ -37,14 +37,26 @@ Route::middleware(['auth', 'can:manage-users'])->prefix('admin')->name('admin.')
         ->name('users.toggle-active');
 });
 
-Route::middleware(['auth', 'can:manage-stock'])->prefix('admin')->name('admin.')->group(function () {
-    Route::resource('stock-items', StockItemController::class)->only(['index', 'create', 'store']);
+// Solo lectura: el listado y el historial de ajustes también son visibles
+// para 'voluntario'. Cualquier acción de escritura vive en el grupo de
+// abajo, protegida por 'manage-stock' (voluntario queda afuera de esas).
+Route::middleware(['auth', 'can:view-stock'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('stock-items', [StockItemController::class, 'index'])->name('stock-items.index');
     Route::get('stock-items/{stockItem}/adjustments', [StockItemController::class, 'adjustments'])
         ->name('stock-items.adjustments');
+});
+
+Route::middleware(['auth', 'can:manage-stock'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('stock-items/create', [StockItemController::class, 'create'])->name('stock-items.create');
+    Route::post('stock-items', [StockItemController::class, 'store'])->name('stock-items.store');
     Route::patch('stock-items/{stockItem}/adjust', [StockItemController::class, 'adjustStock'])
         ->name('stock-items.adjust');
     Route::patch('stock-items/{stockItem}/threshold', [StockItemController::class, 'updateThreshold'])
         ->name('stock-items.update-threshold');
+    Route::patch('stock-items/{stockItem}/deactivate', [StockItemController::class, 'deactivate'])
+        ->name('stock-items.deactivate');
+    Route::patch('stock-items/{stockItem}/reactivate', [StockItemController::class, 'reactivate'])
+        ->name('stock-items.reactivate');
 
     Route::resource('needs', AdditionalNeedController::class)->only(['index', 'store']);
     Route::patch('needs/{additionalNeed}/toggle-active', [AdditionalNeedController::class, 'toggleActive'])

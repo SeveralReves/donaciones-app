@@ -1,12 +1,13 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ConfirmModal from '@/Components/ConfirmModal.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 const props = defineProps({
     user: {
@@ -31,12 +32,30 @@ const submit = () => {
     form.put(route('admin.users.update', props.user.id));
 };
 
-const resetPassword = () => {
-    if (! confirm('¿Generar una nueva contraseña para este usuario?')) {
-        return;
-    }
+const showResetConfirm = ref(false);
+const resettingPassword = ref(false);
 
-    router.post(route('admin.users.reset-password', props.user.id));
+const askResetPassword = () => {
+    showResetConfirm.value = true;
+};
+
+const cancelResetPassword = () => {
+    showResetConfirm.value = false;
+};
+
+const confirmResetPassword = () => {
+    resettingPassword.value = true;
+
+    router.post(
+        route('admin.users.reset-password', props.user.id),
+        {},
+        {
+            onFinish: () => {
+                resettingPassword.value = false;
+                showResetConfirm.value = false;
+            },
+        },
+    );
 };
 </script>
 
@@ -107,12 +126,24 @@ const resetPassword = () => {
                 </form>
 
                 <div class="admin-user-edit__danger">
-                    <DangerButton type="button" @click="resetPassword">
+                    <DangerButton type="button" @click="askResetPassword">
                         Resetear contraseña
                     </DangerButton>
                 </div>
             </div>
         </div>
+
+        <ConfirmModal
+            :show="showResetConfirm"
+            title="Resetear contraseña"
+            message="¿Generar una nueva contraseña para este usuario? La actual dejará de funcionar."
+            confirm-label="Generar nueva contraseña"
+            danger
+            variant="breeze"
+            :processing="resettingPassword"
+            @confirm="confirmResetPassword"
+            @cancel="cancelResetPassword"
+        />
     </AuthenticatedLayout>
 </template>
 

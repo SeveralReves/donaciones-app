@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import ConfirmModal from '@/Components/ConfirmModal.vue';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { userRoleLabel } from '@/utils/labels';
@@ -46,14 +47,31 @@ const roleBadgeClass = (rol) => {
     return 'users-index__role--medical';
 };
 
-const toggleActive = (user) => {
-    const verb = user.active ? 'Desactivar' : 'Activar';
+const confirmingToggle = ref(null);
+const togglingActive = ref(false);
 
-    if (! confirm(`¿${verb} a ${user.name}?`)) {
-        return;
-    }
+const askToggleActive = (user) => {
+    confirmingToggle.value = user;
+};
 
-    router.patch(route('admin.users.toggle-active', user.id), {}, { preserveScroll: true });
+const cancelToggleActive = () => {
+    confirmingToggle.value = null;
+};
+
+const confirmToggleActive = () => {
+    togglingActive.value = true;
+
+    router.patch(
+        route('admin.users.toggle-active', confirmingToggle.value.id),
+        {},
+        {
+            preserveScroll: true,
+            onFinish: () => {
+                togglingActive.value = false;
+                confirmingToggle.value = null;
+            },
+        },
+    );
 };
 </script>
 
@@ -134,7 +152,7 @@ const toggleActive = (user) => {
                                         type="button"
                                         class="users-index__toggle"
                                         :class="{ 'users-index__toggle--activate': !user.active }"
-                                        @click="toggleActive(user)"
+                                        @click="askToggleActive(user)"
                                     >
                                         {{ user.active ? 'Desactivar' : 'Activar' }}
                                     </button>
@@ -149,6 +167,21 @@ const toggleActive = (user) => {
                 </p>
             </div>
         </div>
+
+        <ConfirmModal
+            :show="confirmingToggle !== null"
+            :title="confirmingToggle?.active ? 'Desactivar usuario' : 'Activar usuario'"
+            :message="
+                confirmingToggle
+                    ? `¿${confirmingToggle.active ? 'Desactivar' : 'Activar'} a ${confirmingToggle.name}?`
+                    : ''
+            "
+            :confirm-label="confirmingToggle?.active ? 'Desactivar' : 'Activar'"
+            :danger="confirmingToggle?.active"
+            :processing="togglingActive"
+            @confirm="confirmToggleActive"
+            @cancel="cancelToggleActive"
+        />
     </AuthenticatedLayout>
 </template>
 
