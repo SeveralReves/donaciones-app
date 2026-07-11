@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AdditionalNeed;
+use App\Models\ChildNeed;
 use App\Models\StockItem;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -37,6 +38,10 @@ class NeedsController extends Controller
         return Inertia::render('Needs', [
             'stockNeeds' => $stockNeeds,
             'additionalNeeds' => $additionalNeeds,
+            // Ver ChildNeed::pendingCountsGroupedByDescription(): agregado y
+            // anónimo a propósito, nunca expone a qué niño corresponde cada
+            // necesidad — este endpoint es público y sin autenticación.
+            'childProgramNeeds' => ChildNeed::pendingCountsGroupedByDescription(),
         ]);
     }
 }

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-#[Fillable(['name', 'email', 'password', 'rol', 'active', 'codigo_medico', 'servicio'])]
+#[Fillable(['name', 'email', 'password', 'rol', 'active', 'can_access_children_module', 'codigo_medico', 'servicio'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
@@ -28,6 +28,7 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'active' => 'boolean',
+            'can_access_children_module' => 'boolean',
         ];
     }
 
@@ -53,5 +54,16 @@ class User extends Authenticatable
     public function isAdminOrAbove(): bool
     {
         return $this->rol === 'admin' || $this->isSuperAdmin();
+    }
+
+    /**
+     * El módulo de niños es un dominio aparte del resto de la app: ni
+     * siquiera 'admin' entra por defecto. Un super_admin sí, siempre — igual
+     * que con cualquier otro módulo — porque tiene acceso a todo sin
+     * excepción.
+     */
+    public function canAccessChildrenModule(): bool
+    {
+        return $this->isSuperAdmin() || $this->can_access_children_module;
     }
 }

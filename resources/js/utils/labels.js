@@ -35,3 +35,12 @@ export const USER_ROLE_LABELS = {
 export function userRoleLabel(rol) {
     return USER_ROLE_LABELS[rol] ?? rol;
 }
+
+export const CHILD_NEED_STATUS_LABELS = {
+    pendiente: 'Pendiente',
+    cubierta: 'Cubierta',
+};
+
+export function childNeedStatusLabel(status) {
+    return CHILD_NEED_STATUS_LABELS[status] ?? status;
+}

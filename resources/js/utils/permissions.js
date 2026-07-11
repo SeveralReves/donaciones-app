@@ -25,3 +25,12 @@ export function canCreateDonations(user) {
 export function canViewStock(user) {
     return isAdmin(user) || user.rol === 'voluntario';
 }
+
+/**
+ * Espejo de la Gate 'access-children-module': módulo aparte del resto de la
+ * app, ni siquiera isAdmin() da acceso por defecto — solo
+ * can_access_children_module explícito, o super_admin (acceso a todo).
+ */
+export function canAccessChildrenModule(user) {
+    return user.rol === 'super_admin' || Boolean(user.can_access_children_module);
+}

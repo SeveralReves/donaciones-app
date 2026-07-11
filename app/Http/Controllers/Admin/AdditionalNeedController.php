@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AdditionalNeed;
+use App\Models\ChildNeed;
 use App\Models\StockItem;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -33,6 +34,12 @@ class AdditionalNeedController extends Controller
             // en cambio solo muestra las activas.
             'additionalNeeds' => AdditionalNeed::query()->latest()->get(),
             'publicNeedsUrl' => route('needs.index'),
+            // Igual que en la página pública: agregado y anónimo a
+            // propósito (ver ChildNeed::pendingCountsGroupedByDescription).
+            // Esta pantalla la puede ver cualquier admin/super_admin, no
+            // solo quien tiene acceso al módulo de niños, así que tampoco
+            // acá puede filtrarse a qué niño corresponde cada necesidad.
+            'childProgramNeeds' => ChildNeed::pendingCountsGroupedByDescription(),
         ]);
     }
 

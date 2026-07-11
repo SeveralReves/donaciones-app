@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Checkbox from '@/Components/Checkbox.vue';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
@@ -14,6 +15,7 @@ const form = useForm({
     rol: 'medico',
     codigo_medico: '',
     servicio: '',
+    can_access_children_module: false,
 });
 
 const showMedicoFields = computed(() =>
@@ -77,6 +79,14 @@ const submit = () => {
                         <InputError :message="form.errors.servicio" />
                     </div>
 
+                    <div class="admin-user-form__checkbox">
+                        <label class="admin-user-form__checkbox-label">
+                            <Checkbox v-model:checked="form.can_access_children_module" />
+                            Acceso al módulo de niños
+                        </label>
+                        <InputError :message="form.errors.can_access_children_module" />
+                    </div>
+
                     <div class="admin-user-form__actions">
                         <PrimaryButton
                             :class="{ 'is-busy': form.processing }"
@@ -103,5 +113,13 @@ const submit = () => {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+}
+
+.admin-user-form__checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 </style>

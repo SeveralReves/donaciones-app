@@ -3,7 +3,7 @@ import Dropdown from '@/Components/Dropdown.vue';
 import DropdownLink from '@/Components/DropdownLink.vue';
 import { useInstallPrompt } from '@/composables/useInstallPrompt';
 import { Link } from '@inertiajs/vue3';
-import { canCreateDonations, canViewStock, isAdmin } from '@/utils/permissions';
+import { canAccessChildrenModule, canCreateDonations, canViewStock, isAdmin } from '@/utils/permissions';
 
 const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
 </script>
@@ -63,6 +63,13 @@ const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
                             :class="{ 'app-header__nav-link--active': route().current('admin.needs.*') }"
                         >
                             Necesidades
+                        </Link>
+                        <Link
+                            v-if="canAccessChildrenModule($page.props.auth.user)"
+                            :href="route('children.index')"
+                            class="app-header__nav-link app-header__nav-link--children"
+                        >
+                            Módulo de Niños ↗
                         </Link>
                     </nav>
                 </div>
@@ -150,22 +157,6 @@ const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
                 </span>
             </Link>
             <Link
-                v-if="canCreateDonations($page.props.auth.user)"
-                :href="route('donations.create')"
-                class="bottom-nav__item"
-            >
-                <span
-                    class="bottom-nav__dot"
-                    :class="{ 'bottom-nav__dot--active': route().current('donations.create') }"
-                ></span>
-                <span
-                    class="bottom-nav__label"
-                    :class="{ 'bottom-nav__label--active': route().current('donations.create') }"
-                >
-                    Nueva
-                </span>
-            </Link>
-            <Link
                 v-if="isAdmin($page.props.auth.user)"
                 :href="route('admin.users.index')"
                 class="bottom-nav__item"
@@ -212,6 +203,14 @@ const { canInstall, promptInstall, showIosInstallHint } = useInstallPrompt();
                 >
                     Necesidades
                 </span>
+            </Link>
+            <Link
+                v-if="canAccessChildrenModule($page.props.auth.user)"
+                :href="route('children.index')"
+                class="bottom-nav__item"
+            >
+                <span class="bottom-nav__dot"></span>
+                <span class="bottom-nav__label">Niños</span>
             </Link>
         </nav>
     </div>

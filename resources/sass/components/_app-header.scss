@@ -133,6 +133,19 @@
                 color: #fff;
             }
         }
+
+        // El módulo de niños vive en su propio layout (ver
+        // ChildrenLayout.vue) — este link es solo la puerta de entrada, así
+        // que se distingue con un morado propio en vez del verde/blanco del
+        // resto del nav, para no dar la impresión de que es "una sección
+        // más" de Donaciones.
+        &--children {
+            color: #d9c9ff;
+
+            &:hover {
+                color: #fff;
+            }
+        }
     }
 
     &__actions {

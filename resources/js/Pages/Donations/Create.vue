@@ -12,22 +12,39 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    prefill: {
+        type: Object,
+        default: () => ({}),
+    },
 });
 
 const itemUnits = ['unidades', 'cajas', 'kg', 'litros', 'paquetes', 'frascos'];
 
-const blankItem = () => ({ stock_item_id: '', name: '', quantity: '', unit: '', units_per_box: '' });
+// Cuando viene de "Iniciar donación para esta necesidad"
+// (ChildNeedController@initiateDonationForNeed), el primer item arranca
+// como texto libre con la descripción de la necesidad — el usuario decide
+// si la deja así o la reemplaza por un insumo real del catálogo.
+const blankItem = (name = '') => ({
+    stock_item_id: name ? 'otro' : '',
+    name,
+    quantity: '',
+    unit: '',
+    units_per_box: '',
+});
+
+const isFromChildNeed = Boolean(props.prefill?.child_need_id);
 
 const form = useForm({
     donation_type_id: props.donationTypes[0]?.id ?? '',
-    location: '',
-    patient_name: '',
+    location: props.prefill?.location ?? '',
+    patient_name: props.prefill?.patient_name ?? '',
     receiving_doctor_name: '',
     receiving_doctor_code: '',
     receiving_service: '',
-    contact_number: '',
+    contact_number: props.prefill?.contact_number ?? '',
     cedula: '',
-    items: [blankItem()],
+    items: [blankItem(props.prefill?.item_description ?? '')],
+    child_need_id: props.prefill?.child_need_id ?? null,
 });
 
 const selectedDonationType = computed(() =>
@@ -50,9 +67,16 @@ const stockItemById = (id) => props.stockItems.find((stockItem) => stockItem.id 
 
 const selectDonationType = (donationTypeId) => {
     form.donation_type_id = donationTypeId;
-    // Los insumos elegidos son del catálogo de otro tipo; en vez de dejar
-    // selecciones inválidas que solo se notarían al enviar, se reinicia.
-    form.items = [blankItem()];
+    // Los insumos de catálogo elegidos son del tipo anterior; en vez de
+    // dejar selecciones inválidas que solo se notarían al enviar, se
+    // reinician. Los de texto libre ('otro') no pertenecen a ningún
+    // catálogo, así que sobreviven el cambio — si no, el primer item
+    // prellenado al venir de "Iniciar donación para esta necesidad" (ver
+    // ChildNeedController@initiateDonationForNeed) desaparecería en cuanto
+    // el usuario eligiera el tipo real de la donación.
+    form.items = form.items.map((item) =>
+        item.stock_item_id && item.stock_item_id !== 'otro' ? blankItem() : item,
+    );
 };
 
 const onStockItemChange = (item) => {
@@ -102,6 +126,11 @@ const submit = () => {
 
             <h1 class="donation-form__title">Nueva donación</h1>
             <p class="donation-form__subtitle">Registra qué se dona y a dónde va</p>
+
+            <div v-if="isFromChildNeed" class="alert alert--info donation-form__child-need-banner">
+                Esta donación cubrirá una necesidad del módulo de niños. Al guardarla, la necesidad
+                quedará marcada como cubierta automáticamente.
+            </div>
 
             <div class="surface donation-form__panel">
                 <form @submit.prevent="submit">
@@ -429,6 +458,10 @@ const submit = () => {
 
 .donation-form__panel {
     padding: 1.75rem 1.5rem;
+}
+
+.donation-form__child-need-banner {
+    margin-bottom: 1.25rem;
 }
 
 .donation-form__label {

@@ -3,6 +3,8 @@
 use App\Http\Controllers\Admin\AdditionalNeedController;
 use App\Http\Controllers\Admin\StockItemController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Children\ChildController;
+use App\Http\Controllers\Children\ChildNeedController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DonationController;
 use App\Http\Controllers\NeedsController;
@@ -61,6 +63,22 @@ Route::middleware(['auth', 'can:manage-stock'])->prefix('admin')->name('admin.')
     Route::resource('needs', AdditionalNeedController::class)->only(['index', 'store']);
     Route::patch('needs/{additionalNeed}/toggle-active', [AdditionalNeedController::class, 'toggleActive'])
         ->name('needs.toggle-active');
+});
+
+// Módulo aparte del resto de la app (ver User::canAccessChildrenModule() y
+// la Gate 'access-children-module'): ni 'admin' entra por defecto, así que
+// vive en su propio grupo de rutas en vez de reutilizar 'manage-stock' o
+// 'manage-users'.
+Route::middleware(['auth', 'can:access-children-module'])->group(function () {
+    Route::resource('children', ChildController::class)
+        ->only(['index', 'create', 'store', 'show', 'edit', 'update']);
+
+    Route::post('children/{child}/needs', [ChildNeedController::class, 'store'])
+        ->name('children.needs.store');
+    Route::patch('child-needs/{childNeed}/mark-covered', [ChildNeedController::class, 'markCovered'])
+        ->name('child-needs.mark-covered');
+    Route::get('child-needs/{childNeed}/initiate-donation', [ChildNeedController::class, 'initiateDonationForNeed'])
+        ->name('child-needs.initiate-donation');
 });
 
 require __DIR__.'/auth.php';

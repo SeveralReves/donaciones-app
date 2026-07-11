@@ -101,6 +101,13 @@ class StoreDonationRequest extends FormRequest
             'receiving_service' => [Rule::requiredIf($requiresDoctor), 'nullable', 'string', 'max:255'],
             'contact_number' => ['nullable', 'string', 'max:255'],
             'cedula' => ['nullable', 'string', 'max:255'],
+
+            // Presente solo cuando la donación se inició desde
+            // ChildNeedController@initiateDonationForNeed (ver
+            // Donations/Create.vue, campo oculto). DonationController@store
+            // decide si aplica el enganche según si el actor tiene acceso al
+            // módulo de niños — acá solo se valida que exista.
+            'child_need_id' => ['nullable', 'string', Rule::exists('child_needs', 'id')],
         ];
     }
 

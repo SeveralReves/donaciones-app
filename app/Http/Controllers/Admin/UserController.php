@@ -17,7 +17,7 @@ class UserController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/Users/Index', [
-            'users' => User::orderBy('name')->get(['id', 'name', 'email', 'rol', 'active', 'codigo_medico', 'servicio']),
+            'users' => User::orderBy('name')->get(['id', 'name', 'email', 'rol', 'active', 'can_access_children_module', 'codigo_medico', 'servicio']),
         ]);
     }
 
@@ -40,7 +40,7 @@ class UserController extends Controller
         Gate::authorize('modify-user', $user);
 
         return Inertia::render('Admin/Users/Edit', [
-            'user' => $user->only(['id', 'name', 'email', 'rol', 'codigo_medico', 'servicio']),
+            'user' => $user->only(['id', 'name', 'email', 'rol', 'codigo_medico', 'servicio', 'can_access_children_module']),
         ]);
     }
 
@@ -102,6 +102,7 @@ class UserController extends Controller
             'rol' => ['required', Rule::in(['admin', 'medico', 'odontologo', 'voluntario'])],
             'codigo_medico' => ['nullable', 'string', 'max:255'],
             'servicio' => ['nullable', 'string', 'max:255'],
+            'can_access_children_module' => ['sometimes', 'boolean'],
         ]);
 
         if ($validated['rol'] === 'admin') {

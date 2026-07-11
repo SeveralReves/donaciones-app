@@ -55,5 +55,10 @@ class AppServiceProvider extends ServiceProvider
         // donaciones nuevas — eso requiere reunir datos completos (médico,
         // insumos, etc.) que se espera maneje personal con más contexto.
         Gate::define('create-donations', fn (User $user): bool => $user->rol !== 'voluntario');
+
+        // Módulo aparte del resto del sistema: ni 'admin' entra por defecto,
+        // solo quien tenga can_access_children_module en true (o un
+        // super_admin, que tiene acceso a todo sin excepción).
+        Gate::define('access-children-module', fn (User $user): bool => $user->canAccessChildrenModule());
     }
 }

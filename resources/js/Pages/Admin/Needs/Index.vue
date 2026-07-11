@@ -19,6 +19,13 @@ const props = defineProps({
         type: String,
         required: true,
     },
+    // Solo description + total_children_needing (ver
+    // ChildNeed::pendingCountsGroupedByDescription) — a propósito, sin
+    // ningún campo que identifique a un niño puntual.
+    childProgramNeeds: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const groupedStockNeeds = computed(() => groupStockNeedsByType(props.stockNeeds));
@@ -94,6 +101,28 @@ const toggleActive = (need) => {
                         </li>
                     </ul>
                 </div>
+            </div>
+
+            <div v-if="childProgramNeeds.length > 0" class="surface needs-admin__section">
+                <h2 class="surface__title">Necesidades del programa de atención infantil</h2>
+                <p class="needs-admin__hint">
+                    Agregado y anónimo a propósito: no identifica a qué niño corresponde cada
+                    necesidad. Para ver el detalle por niño, entrá al módulo de niños.
+                </p>
+
+                <ul class="needs-admin__list">
+                    <li
+                        v-for="need in childProgramNeeds"
+                        :key="need.description"
+                        class="needs-admin__item"
+                    >
+                        <span class="needs-admin__item-name">{{ need.description }}</span>
+                        <span class="needs-admin__item-qty">
+                            Necesaria para {{ need.total_children_needing }}
+                            {{ need.total_children_needing === 1 ? 'niño' : 'niños' }}
+                        </span>
+                    </li>
+                </ul>
             </div>
 
             <div class="surface needs-admin__section">

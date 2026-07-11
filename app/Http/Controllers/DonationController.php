@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreDonationRequest;
 use App\Http\Requests\UpdateDonationStatusRequest;
+use App\Models\ChildNeed;
 use App\Models\Donation;
 use App\Models\DonationType;
 use App\Models\MedicalReceiver;
@@ -48,7 +49,7 @@ class DonationController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
         Gate::authorize('create-donations');
 
@@ -61,6 +62,13 @@ class DonationController extends Controller
                 ->where('active', true)
                 ->orderBy('name')
                 ->get(['id', 'name', 'unit', 'donation_type_id', 'quantity_available']),
+            // Presente solo cuando se llega acá desde
+            // ChildNeedController@initiateDonationForNeed — el formulario lo
+            // usa para pre-llenar campos y arrastra child_need_id de vuelta
+            // en el POST para que store() pueda enganchar el resultado.
+            'prefill' => $request->only([
+                'patient_name', 'location', 'contact_number', 'item_description', 'child_need_id',
+            ]),
         ]);
     }
 
@@ -70,6 +78,12 @@ class DonationController extends Controller
         $items = $validated['items'];
         unset($validated['items']);
 
+        // child_need_id no es una columna de donations — viaja aparte junto
+        // al resto de los datos validados y se consume después de crear la
+        // donación (ver bloque más abajo).
+        $childNeedId = $validated['child_need_id'] ?? null;
+        unset($validated['child_need_id']);
+
         // donation_type (texto) todavía es NOT NULL y varias pantallas sin
         // migrar (dashboard, filtros, /necesidades) siguen leyéndola; se
         // deriva del tipo elegido en vez de pedírsela al cliente. Se elimina
@@ -77,7 +91,7 @@ class DonationController extends Controller
         // donation_type_id.
         $validated['donation_type'] = DonationType::findOrFail($validated['donation_type_id'])->slug;
 
-        DB::transaction(function () use ($validated, $items, $request): void {
+        DB::transaction(function () use ($validated, $items, $request, $childNeedId): void {
             $donation = Donation::create([
                 ...$validated,
                 'status' => 'creada',
@@ -147,6 +161,30 @@ class DonationController extends Controller
                 'changed_by' => $request->user()->id,
                 'changed_at' => now(),
             ]);
+
+            // Solo si el actor tiene acceso al módulo de niños: child_need_id
+            // ya se validó que existe (Rule::exists), pero eso no basta para
+            // autorizar el enganche — de lo contrario cualquiera con permiso
+            // de crear donaciones podría marcar necesidades como cubiertas
+            // armando el campo oculto a mano, sin pasar nunca por el Gate
+            // 'access-children-module'. Si no tiene acceso, se ignora en vez
+            // de rechazar una donación por lo demás válida.
+            if ($childNeedId && Gate::forUser($request->user())->allows('access-children-module')) {
+                $childNeed = ChildNeed::find($childNeedId);
+
+                if ($childNeed) {
+                    $childNeed->update([
+                        'status' => 'cubierta',
+                        'last_covered_at' => now(),
+                    ]);
+
+                    $childNeed->fulfillments()->create([
+                        'donation_id' => $donation->id,
+                        'fulfilled_by' => $request->user()->id,
+                        'fulfilled_at' => now(),
+                    ]);
+                }
+            }
         });
 
         return redirect()->route('donations.index');

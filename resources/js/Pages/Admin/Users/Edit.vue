@@ -1,5 +1,6 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import Checkbox from '@/Components/Checkbox.vue';
 import ConfirmModal from '@/Components/ConfirmModal.vue';
 import DangerButton from '@/Components/DangerButton.vue';
 import InputError from '@/Components/InputError.vue';
@@ -22,6 +23,7 @@ const form = useForm({
     rol: props.user.rol,
     codigo_medico: props.user.codigo_medico ?? '',
     servicio: props.user.servicio ?? '',
+    can_access_children_module: props.user.can_access_children_module ?? false,
 });
 
 const showMedicoFields = computed(() =>
@@ -115,6 +117,14 @@ const confirmResetPassword = () => {
                         <InputError :message="form.errors.servicio" />
                     </div>
 
+                    <div class="admin-user-form__checkbox">
+                        <label class="admin-user-form__checkbox-label">
+                            <Checkbox v-model:checked="form.can_access_children_module" />
+                            Acceso al módulo de niños
+                        </label>
+                        <InputError :message="form.errors.can_access_children_module" />
+                    </div>
+
                     <div class="admin-user-form__actions">
                         <PrimaryButton
                             :class="{ 'is-busy': form.processing }"
@@ -159,6 +169,14 @@ const confirmResetPassword = () => {
     display: flex;
     align-items: center;
     justify-content: flex-end;
+}
+
+.admin-user-form__checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 500;
 }
 
 .admin-user-edit__flash {

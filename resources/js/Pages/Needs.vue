@@ -14,12 +14,21 @@ const props = defineProps({
         type: Array,
         default: () => [],
     },
+    // Solo description + total_children_needing (ver NeedsController) — no
+    // debe agregarse acá ningún campo que identifique a un niño puntual.
+    childProgramNeeds: {
+        type: Array,
+        default: () => [],
+    },
 });
 
 const groupedStockNeeds = computed(() => groupStockNeedsByType(props.stockNeeds));
 
 const hasAnyNeeds = computed(
-    () => props.stockNeeds.length > 0 || props.additionalNeeds.length > 0,
+    () =>
+        props.stockNeeds.length > 0 ||
+        props.additionalNeeds.length > 0 ||
+        props.childProgramNeeds.length > 0,
 );
 
 // Datos de contacto de la fundación, fijos a propósito: no son parte del
@@ -96,6 +105,23 @@ const contacts = CONTACTS.map((contact) => ({
                         <span class="needs-page__item-name">{{ need.description }}</span>
                         <span v-if="need.quantity_needed" class="needs-page__item-qty">
                             {{ need.quantity_needed }}
+                        </span>
+                    </li>
+                </ul>
+            </section>
+
+            <section v-if="childProgramNeeds.length > 0" class="surface needs-page__section">
+                <h2 class="surface__title">Necesidades del programa de atención infantil</h2>
+                <ul class="needs-page__list">
+                    <li
+                        v-for="need in childProgramNeeds"
+                        :key="need.description"
+                        class="needs-page__item"
+                    >
+                        <span class="needs-page__item-name">{{ need.description }}</span>
+                        <span class="needs-page__item-qty">
+                            Necesaria para {{ need.total_children_needing }}
+                            {{ need.total_children_needing === 1 ? 'niño' : 'niños' }}
                         </span>
                     </li>
                 </ul>
