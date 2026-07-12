@@ -15,7 +15,7 @@ import { Link } from '@inertiajs/vue3';
                                 <span class="app-header__mark-bar app-header__mark-bar--h"></span>
                                 <span class="app-header__mark-bar app-header__mark-bar--v"></span>
                             </span>
-                        </span>L
+                        </span>
                         <span class="children-header__brand-name">Módulo de Niños</span>
                     </Link>
 
