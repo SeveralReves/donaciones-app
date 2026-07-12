@@ -18,7 +18,9 @@ class Child extends Model
         'guardian_name',
         'guardian_phone',
         'address',
+        'condition_notes',
         'active',
+        'needs_review',
         'created_by',
     ];
 
@@ -30,6 +32,7 @@ class Child extends Model
             // reconoce el valor al precargarlo.
             'birthdate' => 'date:Y-m-d',
             'active' => 'boolean',
+            'needs_review' => 'boolean',
         ];
     }
 
