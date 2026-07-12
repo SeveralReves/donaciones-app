@@ -16,7 +16,7 @@ const props = defineProps({
 const form = useForm({
     name: props.child.name,
     birthdate: props.child.birthdate ?? '',
-    guardian_name: props.child.guardian_name,
+    guardian_name: props.child.guardian_name ?? '',
     guardian_phone: props.child.guardian_phone,
     address: props.child.address,
     condition_ids: props.child.conditions.map((condition) => condition.id),
@@ -57,8 +57,8 @@ const submit = () => {
                 </div>
 
                 <div class="form-field">
-                    <label for="guardian_name" class="form-field__label">Nombre del responsable</label>
-                    <input id="guardian_name" v-model="form.guardian_name" type="text" class="form-field__input" required />
+                    <label for="guardian_name" class="form-field__label">Nombre del responsable (opcional)</label>
+                    <input id="guardian_name" v-model="form.guardian_name" type="text" class="form-field__input" />
                     <p v-if="form.errors.guardian_name" class="form-field__error">{{ form.errors.guardian_name }}</p>
                 </div>
 

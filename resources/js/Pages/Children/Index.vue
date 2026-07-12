@@ -47,8 +47,10 @@ defineProps({
                                 <span v-if="!child.active" class="children-index__inactive-tag">Inactivo</span>
                             </td>
                             <td class="children-index__col--md">
-                                {{ child.guardian_name }}
-                                <span class="children-index__guardian-phone">{{ child.guardian_phone }}</span>
+                                {{ child.guardian_name ?? 'Sin nombre registrado' }}
+                                <span class="children-index__guardian-phone">
+                                    {{ child.guardian_phone ?? 'Sin teléfono' }}
+                                </span>
                             </td>
                             <td class="children-index__col--md">
                                 <span

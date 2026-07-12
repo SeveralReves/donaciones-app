@@ -63,7 +63,8 @@ const markCovered = (need) => {
                 <div>
                     <h1 class="children-show__title">{{ child.name }}</h1>
                     <p class="children-show__subtitle">
-                        Responsable: {{ child.guardian_name }} · {{ child.guardian_phone }}
+                        Responsable: {{ child.guardian_name ?? 'Sin nombre registrado' }} ·
+                        {{ child.guardian_phone ?? 'Sin teléfono' }}
                     </p>
                 </div>
                 <Link :href="route('children.edit', child.id)" class="btn btn--secondary">

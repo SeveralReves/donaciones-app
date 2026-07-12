@@ -112,7 +112,10 @@ class ChildController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:255'],
             'birthdate' => ['nullable', 'date'],
-            'guardian_name' => ['required', 'string', 'max:255'],
+            // No siempre se sabe el nombre exacto del tutor; el teléfono en
+            // cambio es el dato crítico para poder contactarlo, así que
+            // sigue siendo obligatorio.
+            'guardian_name' => ['nullable', 'string', 'max:255'],
             'guardian_phone' => ['required', 'string', 'max:255'],
             'address' => ['required', 'string', 'max:255'],
             'condition_ids' => ['sometimes', 'array'],
